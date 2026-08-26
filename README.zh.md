@@ -37,23 +37,30 @@
 
 ## 安装
 
-尚未发 npm，从仓库安装：
+DSH 插件装在 **profile** 里，不是全局 `dsh`。`dsh plugin add` 会在该 profile 里跑 pnpm；本包装了 `dsh.bundle`，所以会**自动写进** `dsh.profile.bundles`。然后重启这个 profile。
+
+日常网页端：
 
 ```sh
-git clone https://github.com/more-nico/dsh-nico-theme.git
-cd dsh-nico-theme
-pnpm install
-pnpm bundle
-dsh plugin --profile web add .
+dsh plugin --profile web add dsh-nico-theme@latest
 ```
 
-重启 `dsh web`。在 **设置 → 插件** 打开 **Nico 玻璃主题**。旋钮在 **设置 → 通用设置 → 外观**。
+然后重启 `dsh web`。在 **设置 → 插件** 打开 **Nico 玻璃主题**。旋钮在 **设置 → 通用设置 → 外观**。
 
-想单独试、不动日常 `web` profile：
+单独试、不动日常 `web`：
 
 ```sh
-dsh plugin --profile nico-theme-test add .
+dsh plugin --profile nico-theme-test add dsh-nico-theme@latest
 dsh --profile nico-theme-test --host 127.0.0.1 --port 18765 --no-open
+```
+
+以后更新还是这条命令（`@latest`），或 `dsh plugin --profile web update`。卸掉：`dsh plugin --profile web remove dsh-nico-theme`。
+
+本地开发：
+
+```sh
+pnpm install && pnpm bundle
+dsh plugin --profile nico-theme-test add .
 ```
 
 ## 开发
@@ -64,6 +71,8 @@ pnpm bundle
 pnpm visual          # 对测试 profile 跑 Playwright
 pnpm readme-shots    # 刷新 assets/ 里的深色流体截图
 ```
+
+维护者：`npm login`，然后 `git tag v0.1.0 && git push origin v0.1.0`。GitHub Actions 会发 npm（仓库要有 `NPM_TOKEN`）。也可以本地 `pnpm bundle` 后 `pnpm publish`。
 
 ## 许可
 

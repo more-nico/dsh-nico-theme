@@ -37,23 +37,30 @@ The edge refraction — rounded-rect SDF displacement maps fed into SVG `feDispl
 
 ## Install
 
-From a clone (recommended while the package is not on npm):
+DSH plugins live on a **profile**, not in the global `dsh` install. `dsh plugin add` runs pnpm inside that profile and, because this package declares `dsh.bundle`, **appends it to `dsh.profile.bundles` automatically**. Then restart the profile.
+
+Daily Web UI:
 
 ```sh
-git clone https://github.com/more-nico/dsh-nico-theme.git
-cd dsh-nico-theme
-pnpm install
-pnpm bundle
-dsh plugin --profile web add .
+dsh plugin --profile web add dsh-nico-theme@latest
 ```
 
-Restart `dsh web`. Enable **Nico glass theme** in Settings → Plugins. Knobs sit under Settings → General → Appearance.
+Then restart `dsh web`. Enable **Nico glass theme** in Settings → Plugins. Knobs sit under Settings → General → Appearance.
 
-An isolated profile is safer for trying it out (it never touches the daily `web` profile):
+A throwaway profile (does not touch `web`):
 
 ```sh
-dsh plugin --profile nico-theme-test add .
+dsh plugin --profile nico-theme-test add dsh-nico-theme@latest
 dsh --profile nico-theme-test --host 127.0.0.1 --port 18765 --no-open
+```
+
+Update later with the same command (`@latest`) or `dsh plugin --profile web update`. Remove with `dsh plugin --profile web remove dsh-nico-theme`.
+
+From a local checkout (development):
+
+```sh
+pnpm install && pnpm bundle
+dsh plugin --profile nico-theme-test add .
 ```
 
 ## Develop
@@ -64,6 +71,8 @@ pnpm bundle
 pnpm visual          # Playwright checks against the test profile
 pnpm readme-shots    # refresh the dark-fluid images in assets/
 ```
+
+Maintainers: `npm login`, then `git tag v0.1.0 && git push origin v0.1.0`. GitHub Actions publishes the tarball (needs repo secret `NPM_TOKEN`). Or `pnpm publish` locally after `pnpm bundle`.
 
 ## License
 

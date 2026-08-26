@@ -1,102 +1,371 @@
-/* Aqua row in the General settings section: four titled sub-groups (mode /
- * glass material / background / decorations) that follow the Appearance
- * cubes directly, same hairline separator rhythm as the shipped rows; the
- * section column strips the last one. Nothing renders while the master
- * switch is off. */
+/* Native DSH settings language for the Nico appearance row. The row is kept
+ * flat: headings establish sections, while every value uses the same setting
+ * lane and token-driven control treatment. */
 
 .group {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding: 8px 0 16px;
+  gap: 24px;
+  padding: 12px 0 20px;
   border-bottom: 1px solid var(--dsw-alias-border-l2);
 }
 
-/* One titled sub-group: title over its control stack. */
 .subGroup {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
 }
 
 .subTitle {
-  font-size: 13px;
-  line-height: 20px;
-  font-weight: 600;
+  margin: 0;
   color: var(--dsw-alias-label-primary);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 22px;
 }
 
-/* Controls stack: one column of rows and knobs. */
 .controls {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  min-width: 0;
 }
 
-/* Label + segmented picker row (mode / backdrop source). */
-.row {
-  display: flex;
+/* All regular settings share one label lane and one value lane. */
+.row,
+.knob,
+.rowStandalone {
+  min-height: 40px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--dsw-alias-border-l2);
+}
+
+.row,
+.knob {
+  display: grid;
   align-items: center;
-  gap: 10px;
+  column-gap: 16px;
+  grid-template-columns: minmax(120px, 0.75fr) minmax(0, 1.25fr);
 }
 
-.rowLabel {
-  flex: none;
-  width: 92px;
-  font-size: 12px;
-  line-height: 18px;
+.rowStandalone {
+  display: flex;
+  justify-content: stretch;
+}
+
+.rowStandalone .rowControl {
+  width: 100%;
+}
+
+.rowLabel,
+.knobLabel {
+  min-width: 0;
   color: var(--dsw-alias-label-secondary);
+  font-size: 13px;
+  line-height: 20px;
 }
 
-/* Short inline label next to a second toggle in the same row (critters). */
-.inlineLabel {
-  flex: none;
-  font-size: 12px;
-  line-height: 18px;
-  color: var(--dsw-alias-label-secondary);
+.knob {
+  grid-template-columns: minmax(120px, 0.75fr) minmax(0, 1fr) auto;
 }
 
-/* Hints under a row/knob: indented to the control column (label 92 + gap 10)
- * so every explanation lines up with the control it describes. */
-.rowHint {
-  margin-top: -4px;
-  margin-left: 102px;
-  font-size: 12px;
-  line-height: 18px;
-  color: var(--dsw-alias-label-tertiary);
-}
-
-/* Full-width hint under a label-less row (the mode hint sits under the
- * segmented control, which starts at the group's left edge). */
-.groupHint {
-  margin-top: -4px;
-  font-size: 12px;
-  line-height: 18px;
-  color: var(--dsw-alias-label-tertiary);
+.rowControl {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
 }
 
 .knobHint {
-  margin-top: -4px;
-  margin-left: 102px;
+  padding: 2px 0 6px;
+  color: var(--dsw-alias-label-tertiary);
   font-size: 12px;
   line-height: 18px;
-  color: var(--dsw-alias-label-tertiary);
 }
 
-/* Boolean toggle pill (particle whale), same language as the master switch. */
+/* Slider: glass pill track + floating thumb. Uses --nico-progress for the
+ * filled portion so the value is readable without an extra element. */
+.slider {
+  width: 100%;
+  min-width: 0;
+  height: 28px;
+  margin: 0;
+  appearance: none;
+  cursor: pointer;
+  background: transparent;
+  --nico-thumb: 18px;
+}
+
+.slider::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(
+    to right,
+    var(--dsw-alias-state-business-primary) 0 var(--nico-progress),
+    color-mix(in srgb, var(--dsw-alias-border-l2) 92%, transparent) var(--nico-progress) 100%
+  );
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.22);
+}
+
+.slider::-webkit-slider-thumb {
+  width: var(--nico-thumb);
+  height: var(--nico-thumb);
+  margin-top: -6px;
+  appearance: none;
+  border: 0;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow:
+    0 1px 4px rgba(0, 0, 0, 0.42),
+    0 0 0 1px rgba(0, 0, 0, 0.08),
+    0 0 0 3px color-mix(in srgb, var(--dsw-alias-state-business-primary) 18%, transparent);
+  transition:
+    transform 140ms ease,
+    box-shadow 140ms ease;
+}
+
+.slider:hover::-webkit-slider-thumb {
+  box-shadow:
+    0 2px 10px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(0, 0, 0, 0.08),
+    0 0 0 4px color-mix(in srgb, var(--dsw-alias-state-business-primary) 22%, transparent);
+}
+
+.slider:active::-webkit-slider-thumb {
+  transform: scale(1.12);
+}
+
+.slider::-moz-range-track {
+  height: 6px;
+  border: 0;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--dsw-alias-border-l2) 92%, transparent);
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.22);
+}
+
+.slider::-moz-range-progress {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--dsw-alias-state-business-primary);
+}
+
+.slider::-moz-range-thumb {
+  width: var(--nico-thumb);
+  height: var(--nico-thumb);
+  border: 0;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow:
+    0 1px 4px rgba(0, 0, 0, 0.42),
+    0 0 0 1px rgba(0, 0, 0, 0.08),
+    0 0 0 3px color-mix(in srgb, var(--dsw-alias-state-business-primary) 18%, transparent);
+  transition:
+    transform 140ms ease,
+    box-shadow 140ms ease;
+}
+
+.slider::-moz-range-thumb:hover {
+  box-shadow:
+    0 2px 10px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(0, 0, 0, 0.08),
+    0 0 0 4px color-mix(in srgb, var(--dsw-alias-state-business-primary) 22%, transparent);
+}
+
+.slider:focus-visible {
+  outline: 2px solid var(--dsw-alias-brand-primary);
+  outline-offset: 4px;
+}
+
+.numberWrap {
+  display: inline-flex;
+  min-width: 96px;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.number {
+  box-sizing: border-box;
+  width: 72px;
+  height: 32px;
+  padding: 0 9px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 10px;
+  outline: none;
+  background: color-mix(in srgb, var(--dsw-alias-bg-layer-1) 94%, transparent);
+  color: var(--dsw-alias-label-primary);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  line-height: 22px;
+  text-align: right;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  transition:
+    border-color 140ms ease,
+    box-shadow 140ms ease,
+    background 140ms ease;
+}
+
+.number:focus {
+  border-color: var(--dsw-alias-state-business-primary);
+  background: var(--dsw-alias-bg-layer-1);
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--dsw-alias-state-business-primary) 18%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.number:hover {
+  border-color: color-mix(in srgb, var(--dsw-alias-border-l2) 88%, var(--dsw-alias-label-tertiary) 12%);
+}
+
+.number::-webkit-outer-spin-button,
+.number::-webkit-inner-spin-button {
+  margin: 0;
+  appearance: none;
+}
+
+.unit {
+  flex: none;
+  min-width: 14px;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 13px;
+  line-height: 20px;
+}
+
+/* Compact choice control (kept for reuse). */
+.segmented {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 10px;
+  background: var(--dsw-alias-bg-layer-1);
+}
+
+.seg,
+.segActive {
+  min-width: 76px;
+  height: 28px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 13px;
+  line-height: 20px;
+  cursor: pointer;
+}
+
+.seg:hover,
+.segActive:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+
+.segActive {
+  background: var(--dsw-alias-state-business-tertiary);
+  color: var(--dsw-alias-state-business-primary);
+}
+
+/* Large two-column choice cards, matching the host 外观 cards: equal widths,
+ * centered icon/thumbnail + label stack, hairline border, business selected
+ * state. */
+.segmentedCards {
+  display: grid;
+  width: 100%;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.card,
+.cardActive {
+  display: flex;
+  box-sizing: border-box;
+  min-height: 96px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 12px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 12px;
+  background: transparent;
+  color: var(--dsw-alias-label-primary);
+  font-size: 14px;
+  line-height: 22px;
+  cursor: pointer;
+}
+
+.card:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+
+.cardActive {
+  border-color: var(--dsw-alias-label-primary);
+  background: var(--dsw-alias-bg-layer-1);
+}
+
+.cardVisual {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 36px;
+  color: var(--dsw-alias-label-primary);
+}
+
+/* Fluid thumbnail: a static hue-driven gradient preview of the shader board. */
+.thumbFluid {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 6px;
+  background:
+    radial-gradient(24px 16px at 30% 40%, hsl(var(--dsh-aqua-fluid-hue, 200deg) 60% 62% / 0.85), transparent 70%),
+    radial-gradient(28px 20px at 72% 62%, hsl(calc(var(--dsh-aqua-fluid-hue, 200deg) + 40deg) 55% 45% / 0.8), transparent 75%),
+    linear-gradient(160deg, hsl(var(--dsh-aqua-fluid-hue, 200deg) 42% 24%), hsl(calc(var(--dsh-aqua-fluid-hue, 200deg) + 25deg) 45% 14%));
+}
+
+/* Wallpaper thumbnail: the current image, or a token placeholder when empty
+ * or a video (videos have no cheap still frame). */
+.thumbImage {
+  width: 100%;
+  height: 100%;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.thumbPlaceholder {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 1px dashed var(--dsw-alias-border-l2);
+  border-radius: 6px;
+  background: var(--dsw-alias-bg-layer-1);
+}
+
+.seg:focus-visible,
+.segActive:focus-visible,
+.card:focus-visible,
+.cardActive:focus-visible,
+.toggle:focus-visible,
+.toggleOn:focus-visible,
+.pickButton:focus-visible,
+.deleteButton:focus-visible {
+  outline: 2px solid var(--dsw-alias-brand-primary);
+  outline-offset: 2px;
+}
+
+/* Shared switch for every boolean appearance option. */
 .toggle,
 .toggleOn {
   display: inline-flex;
+  box-sizing: border-box;
+  width: 44px;
+  height: 24px;
   align-items: center;
-  gap: 6px;
-  height: 28px;
-  padding: 0 10px 0 6px;
+  padding: 2px;
   border: 1px solid var(--dsw-alias-border-l2);
-  border-radius: 14px;
-  background: transparent;
-  font-size: 12px;
-  line-height: 18px;
-  color: var(--dsw-alias-label-primary);
+  border-radius: 12px;
+  background: var(--dsw-alias-bg-layer-1);
   cursor: pointer;
 }
 
@@ -106,144 +375,153 @@
 
 .toggleOn {
   border-color: transparent;
-  background: var(--dsw-alias-state-business-tertiary);
-  color: var(--dsw-alias-state-business-primary);
+  background: var(--dsw-alias-state-business-primary);
 }
 
-.check {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 16px;
-  height: 16px;
+.toggleOn:hover {
+  background: var(--dsw-alias-state-business-primary);
 }
 
-/* Knob: label, slider, number box + unit. */
-.knob {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+.toggleTrack {
+  display: block;
+  width: 38px;
+  height: 18px;
 }
 
-.knobLabel {
-  flex: none;
-  width: 92px;
-  font-size: 12px;
-  line-height: 18px;
-  color: var(--dsw-alias-label-secondary);
-}
-
-.slider {
-  flex: 1;
-  min-width: 0;
-  accent-color: var(--dsw-alias-state-business-primary);
-}
-
-.numberWrap {
-  flex: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.number {
-  width: 56px;
-  height: 26px;
-  padding: 0 6px;
-  border: 1px solid var(--dsw-alias-border-l2);
-  border-radius: 8px;
-  background: var(--dsw-alias-bg-layer-2);
-  font-size: 12px;
-  line-height: 18px;
-  color: var(--dsw-alias-label-primary);
-  text-align: right;
-}
-
-.number::-webkit-outer-spin-button,
-.number::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-.unit {
-  flex: none;
+.toggleThumb {
+  display: block;
   width: 18px;
-  font-size: 12px;
-  line-height: 18px;
-  color: var(--dsw-alias-label-tertiary);
+  height: 18px;
+  border-radius: 50%;
+  background: var(--dsw-alias-label-tertiary);
+  transition: transform 140ms ease, background-color 140ms ease;
 }
 
-/* Segmented picker: two cells in a hairline frame. */
-.segmented {
-  display: inline-flex;
-  border: 1px solid var(--dsw-alias-border-l2);
-  border-radius: 8px;
-  overflow: hidden;
+.toggleOn .toggleThumb {
+  transform: translateX(18px);
+  background: var(--dsw-alias-label-primary-foreground);
 }
 
-.seg,
-.segActive {
-  height: 26px;
-  padding: 0 12px;
-  border: none;
-  background: transparent;
-  font-size: 12px;
-  line-height: 18px;
-  color: var(--dsw-alias-label-secondary);
-  cursor: pointer;
-}
-
-.seg + .seg,
-.segActive + .seg,
-.seg + .segActive {
-  border-left: 1px solid var(--dsw-alias-border-l2);
-}
-
-.segActive {
-  background: var(--dsw-alias-state-business-tertiary);
-  color: var(--dsw-alias-state-business-primary);
-}
-
-/* Wallpaper picker: hidden file input + a ghost button. */
 .wallpaperPick {
   display: flex;
+  width: 100%;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
+  justify-content: flex-end;
+  gap: 8px;
 }
 
 .fileInput {
   display: none;
 }
 
-.pickButton {
-  height: 26px;
-  padding: 0 12px;
-  border: 1px solid var(--dsw-alias-border-l2);
-  border-radius: 8px;
-  background: transparent;
-  font-size: 12px;
-  line-height: 18px;
-  color: var(--dsw-alias-label-primary);
-  cursor: pointer;
-}
-
-.pickButton:hover {
-  background: var(--dsw-alias-interactive-bg-hover);
-}
-
-/* Delete-wallpaper ghost button: error-tinted, next to the picker. */
+.pickButton,
 .deleteButton {
-  height: 26px;
+  height: 32px;
   padding: 0 12px;
   border: 1px solid var(--dsw-alias-border-l2);
   border-radius: 8px;
-  background: transparent;
-  font-size: 12px;
-  line-height: 18px;
-  color: var(--dsw-alias-label-error);
+  background: var(--dsw-alias-bg-layer-1);
+  color: var(--dsw-alias-label-primary);
+  font-size: 13px;
+  line-height: 20px;
   cursor: pointer;
 }
 
+.pickButton:hover,
 .deleteButton:hover {
   background: var(--dsw-alias-interactive-bg-hover);
+}
+
+.deleteButton {
+  color: var(--dsw-alias-label-error);
+}
+
+.switchGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+}
+
+.switchCell {
+  display: flex;
+  box-sizing: border-box;
+  min-height: 48px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 8px;
+  border-right: 1px solid var(--dsw-alias-border-l2);
+}
+
+.switchCell:last-child {
+  border-right: none;
+}
+
+.switchLabel {
+  min-width: 0;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 13px;
+  line-height: 20px;
+}
+
+@media (max-width: 640px) {
+  .group {
+    gap: 20px;
+    padding: 10px 0 16px;
+  }
+
+  .row,
+  .knob {
+    grid-template-columns: minmax(0, 1fr) auto;
+    row-gap: 8px;
+    align-items: center;
+  }
+
+  .rowLabel,
+  .knobLabel {
+    grid-column: 1 / -1;
+  }
+
+  .rowControl {
+    justify-content: flex-start;
+  }
+
+  .rowStandalone {
+    justify-content: stretch;
+  }
+
+  .rowStandalone .rowControl {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .segmented {
+    width: 100%;
+  }
+
+  .seg,
+  .segActive {
+    flex: 1;
+  }
+
+  .card,
+  .cardActive {
+    min-height: 84px;
+    gap: 6px;
+    padding: 10px;
+  }
+
+  .cardVisual {
+    width: 52px;
+    height: 30px;
+  }
+
+  .wallpaperPick {
+    justify-content: flex-start;
+  }
+
+  .knobHint {
+    padding: 2px 0 6px;
+  }
 }

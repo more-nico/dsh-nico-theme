@@ -10,8 +10,8 @@ export const zh = {
   'aqua.enable': '开启',
   'aqua.disable': '关闭',
   'aqua.mode': '模式',
-  'aqua.modeMica': '云母效果',
-  'aqua.modeCompat': '兼容模式',
+  'aqua.modeMica': '玻璃',
+  'aqua.modeCompat': '兼容',
   'aqua.materialGroup': '玻璃材质',
   'aqua.decorAmbient': '环境装饰',
   'aqua.decorHover': '悬停效果',
@@ -46,6 +46,11 @@ export const zh = {
   'aqua.scrim': '垫层透明度',
   'aqua.scrimBlur': '垫层模糊',
   'aqua.rim': '鼠标描边',
+  'aqua.pageTitle': 'Nico 主题',
+  'aqua.pageSubtitle': '独立设置页 — 集中调节玻璃材质、背景与装饰',
+  'aqua.disabledNotice': '主题已关闭，开启后可在本页调节全部参数',
+  'aqua.enableTheme': '开启主题',
+  'aqua.disableTheme': '关闭主题',
 } satisfies Record<string, string>
 
 export type AquaLocaleKey = keyof typeof zh
@@ -64,7 +69,7 @@ export const en = {
   'aqua.enable': 'On',
   'aqua.disable': 'Off',
   'aqua.mode': 'Mode',
-  'aqua.modeMica': 'Mica',
+  'aqua.modeMica': 'Glass',
   'aqua.modeCompat': 'Compatibility',
   'aqua.materialGroup': 'Glass material',
   'aqua.decorAmbient': 'Ambient',
@@ -100,4 +105,9 @@ export const en = {
   'aqua.scrim': 'Pad opacity',
   'aqua.scrimBlur': 'Pad blur',
   'aqua.rim': 'Pointer rim',
+  'aqua.pageTitle': 'Nico Theme',
+  'aqua.pageSubtitle': 'Dedicated settings page — glass, backdrop, and ambient controls',
+  'aqua.disabledNotice': 'Theme is off. Turn it on to tune everything here.',
+  'aqua.enableTheme': 'Enable theme',
+  'aqua.disableTheme': 'Disable theme',
 } satisfies Record<AquaLocaleKey, string>

@@ -24,3 +24,8 @@ lib/types/**/*.d.ts.map
 
 # Playwright debug dumps. README shots live in assets/.
 tests/screenshots/
+
+# local editor / assistant state
+.commandcode/
+.kilo/
+

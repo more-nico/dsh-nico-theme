@@ -42,6 +42,27 @@ function isHero(): boolean {
     || document.querySelector('[data-phase="hero"]') !== null
 }
 
+const TABLE_WRAP_ATTR = 'data-dsh-nico-table-wrap'
+
+function unwrapTables(root: ParentNode | Document = document): void {
+  for (const wrap of root.querySelectorAll(`[${TABLE_WRAP_ATTR}]`)) {
+    const table = wrap.querySelector('table')
+    if (table !== null) wrap.replaceWith(table)
+    else wrap.remove()
+  }
+}
+
+function wrapWideTables(root: ParentNode = document): void {
+  for (const table of root.querySelectorAll('table')) {
+    if (table.closest(`[${TABLE_WRAP_ATTR}], [class*="tableScroll"]`) !== null) continue
+    if (table.closest(`[data-conversation-scroll], [data-chat-flow-kind], [${PAD_ATTR}]`) === null) continue
+    const wrap = document.createElement('div')
+    wrap.setAttribute(TABLE_WRAP_ATTR, '')
+    table.replaceWith(wrap)
+    wrap.appendChild(table)
+  }
+}
+
 export function markReadingPads(): void {
   for (const node of document.querySelectorAll(`[${PAD_ATTR}]`)) {
     node.removeAttribute(PAD_ATTR)
@@ -82,12 +103,15 @@ export function markReadingPads(): void {
     const expanded = findExpandedPad(card)
     if (expanded !== undefined && expanded !== card) expanded.setAttribute(PAD_ATTR, 'expand')
   }
+
+  wrapWideTables()
 }
 
 export function clearReadingPads(): void {
   for (const node of document.querySelectorAll(`[${PAD_ATTR}]`)) {
     node.removeAttribute(PAD_ATTR)
   }
+  unwrapTables()
   document.documentElement.removeAttribute('data-dsh-nico-home')
   document.documentElement.removeAttribute('data-dsh-nico-scrim')
 }

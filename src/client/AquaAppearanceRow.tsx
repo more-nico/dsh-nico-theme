@@ -10,11 +10,11 @@
  * section is off.
  */
 import { useRef } from 'react'
-import { IconCheckOutline16 } from '@deepseek-ai/dsh-client-ui-primitives'
+import { IconCodeOutline16, IconEnhanceOutline16 } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { PropsLocale, PropsRuntime, PropsStore } from '@deepseek-ai/dsh-client-ui-slots'
 // Type-only: pulls the `settings.general.item` SlotMap merge.
 import type {} from '@deepseek-ai/dsh-client-ui-settings/client'
-import { fileToDataUrl, Knob, Segmented } from './AquaControls.tsx'
+import { fileToDataUrl, Knob, Segmented, Toggle } from './AquaControls.tsx'
 import { loadVideoHandle, saveVideoBlob, saveVideoHandle } from './wallpaper-store.ts'
 import type { createAquaRowStore } from './settings-store.ts'
 import css from './AquaAppearanceRow.module.css'
@@ -187,21 +187,24 @@ export function AquaAppearanceRow(props: AquaAppearanceRowComponentProps) {
   if (!enabled) return null
 
   return (
-    <div className={css.group}>
+    <div className={css.group} data-dsh-nico-appearance>
       {/* 模式 */}
       <div className={css.subGroup}>
         <div className={css.subTitle}>{t('aqua.mode')}</div>
         <div className={css.controls}>
-          <div className={css.row}>
-            <Segmented
-              label={t('aqua.mode')}
-              value={mode}
-              options={[
-                { id: 'mica', label: t('aqua.modeMica') },
-                { id: 'compat', label: t('aqua.modeCompat') },
-              ]}
-              onSelect={setMode}
-            />
+          <div className={css.rowStandalone}>
+            <div className={css.rowControl}>
+              <Segmented
+                label={t('aqua.mode')}
+                value={mode}
+                variant="cards"
+                options={[
+                  { id: 'mica', label: t('aqua.modeMica'), visual: <IconEnhanceOutline16 />, visualClass: css.cardVisual },
+                  { id: 'compat', label: t('aqua.modeCompat'), visual: <IconCodeOutline16 />, visualClass: css.cardVisual },
+                ]}
+                onSelect={setMode}
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -215,17 +218,9 @@ export function AquaAppearanceRow(props: AquaAppearanceRowComponentProps) {
             <Knob label={t('aqua.frost')} value={frost} min={0} max={100} step={1} unit="%" onChange={setFrost} />
             <div className={css.row}>
               <span className={css.rowLabel}>{t('aqua.refractOn')}</span>
-              <button
-                type="button"
-                className={refractOn ? css.toggleOn : css.toggle}
-                aria-pressed={refractOn}
-                onClick={() => { setRefractOn(!refractOn) }}
-              >
-                <span className={css.check}>
-                  {refractOn && <IconCheckOutline16 />}
-                </span>
-                {refractOn ? t('aqua.enable') : t('aqua.disable')}
-              </button>
+              <div className={css.rowControl}>
+                <Toggle label={t('aqua.refractOn')} pressed={refractOn} onChange={setRefractOn} />
+              </div>
             </div>
             {refractOn && (
               <Knob label={t('aqua.refract')} value={refract} min={0} max={100} step={1} unit="%" onChange={setRefract} />
@@ -238,16 +233,31 @@ export function AquaAppearanceRow(props: AquaAppearanceRowComponentProps) {
       <div className={css.subGroup}>
         <div className={css.subTitle}>{t('aqua.background')}</div>
         <div className={css.controls}>
-          <div className={css.row}>
-            <Segmented
-              label={t('aqua.background')}
-              value={background}
-              options={[
-                { id: 'fluid', label: t('aqua.backgroundFluid') },
-                { id: 'wallpaper', label: t('aqua.backgroundWallpaper') },
-              ]}
-              onSelect={setBackground}
-            />
+          <div className={css.rowStandalone}>
+            <div className={css.rowControl}>
+              <Segmented
+                label={t('aqua.background')}
+                value={background}
+                variant="cards"
+                options={[
+                  {
+                    id: 'fluid',
+                    label: t('aqua.backgroundFluid'),
+                    visual: <span className={css.thumbFluid} />,
+                    visualClass: css.cardVisual,
+                  },
+                  {
+                    id: 'wallpaper',
+                    label: t('aqua.backgroundWallpaper'),
+                    visual: wallpaper.startsWith('data:image/')
+                      ? <img className={css.thumbImage} src={wallpaper} alt="" />
+                      : <span className={css.thumbPlaceholder} />,
+                    visualClass: css.cardVisual,
+                  },
+                ]}
+                onSelect={setBackground}
+              />
+            </div>
           </div>
 
           {background === 'fluid' && (
@@ -261,61 +271,63 @@ export function AquaAppearanceRow(props: AquaAppearanceRowComponentProps) {
             <>
               <div className={css.row}>
                 <span className={css.rowLabel}>{t('aqua.wallpaper')}</span>
-                <div className={css.wallpaperPick}>
-                  <input
-                    ref={fileRef}
-                    type="file"
-                    accept="image/*"
-                    className={css.fileInput}
-                    onChange={(e) => {
-                      const file = e.target.files?.[0]
-                      if (file !== undefined) {
-                        setBackground('wallpaper')
-                        void fileToDataUrl(file).then(setWallpaper)
-                      }
-                      e.target.value = ''
-                    }}
-                  />
-                  <input
-                    ref={videoRef}
-                    type="file"
-                    accept="video/mp4,video/webm,video/ogg,video/quicktime"
-                    className={css.fileInput}
-                    onChange={(e) => {
-                      const file = e.target.files?.[0]
-                      if (file !== undefined) {
-                        // Picking a backdrop switches the source to wallpaper
-                        // automatically, so the media shows right away. The
-                        // video plays through the browser's native decoder as
-                        // the background (no controls, no progress bar).
-                        setBackground('wallpaper')
-                        // ALWAYS persist videos in IndexedDB: even a small
-                        // video's data URL can blow the localStorage quota
-                        // (base64 inflates 33%), which would silently lose
-                        // the wallpaper on the next reload. Only when idb is
-                        // unavailable do we fall back to the data-URL path.
-                        void saveVideoBlob(file).then((id) => {
-                          if (id !== '') {
-                            setWallpaper(id)
-                          } else {
-                            void fileToDataUrl(file).then(setWallpaper)
-                          }
-                        })
-                      }
-                      e.target.value = ''
-                    }}
-                  />
-                  <button type="button" className={css.pickButton} onClick={() => { fileRef.current?.click() }}>
-                    {t('aqua.chooseImage')}
-                  </button>
-                  <button type="button" className={css.pickButton} onClick={onChooseVideo}>
-                    {t('aqua.chooseVideo')}
-                  </button>
-                  {wallpaper !== '' && (
-                    <button type="button" className={css.deleteButton} onClick={() => { setWallpaper('') }}>
-                      {t('aqua.deleteWallpaper')}
+                <div className={css.rowControl}>
+                  <div className={css.wallpaperPick}>
+                    <input
+                      ref={fileRef}
+                      type="file"
+                      accept="image/*"
+                      className={css.fileInput}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0]
+                        if (file !== undefined) {
+                          setBackground('wallpaper')
+                          void fileToDataUrl(file).then(setWallpaper)
+                        }
+                        e.target.value = ''
+                      }}
+                    />
+                    <input
+                      ref={videoRef}
+                      type="file"
+                      accept="video/mp4,video/webm,video/ogg,video/quicktime"
+                      className={css.fileInput}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0]
+                        if (file !== undefined) {
+                          // Picking a backdrop switches the source to wallpaper
+                          // automatically, so the media shows right away. The
+                          // video plays through the browser's native decoder as
+                          // the background (no controls, no progress bar).
+                          setBackground('wallpaper')
+                          // ALWAYS persist videos in IndexedDB: even a small
+                          // video's data URL can blow the localStorage quota
+                          // (base64 inflates 33%), which would silently lose
+                          // the wallpaper on the next reload. Only when idb is
+                          // unavailable do we fall back to the data-URL path.
+                          void saveVideoBlob(file).then((id) => {
+                            if (id !== '') {
+                              setWallpaper(id)
+                            } else {
+                              void fileToDataUrl(file).then(setWallpaper)
+                            }
+                          })
+                        }
+                        e.target.value = ''
+                      }}
+                    />
+                    <button type="button" className={css.pickButton} onClick={() => { fileRef.current?.click() }}>
+                      {t('aqua.chooseImage')}
                     </button>
-                  )}
+                    <button type="button" className={css.pickButton} onClick={onChooseVideo}>
+                      {t('aqua.chooseVideo')}
+                    </button>
+                    {wallpaper !== '' && (
+                      <button type="button" className={css.deleteButton} onClick={() => { setWallpaper('') }}>
+                        {t('aqua.deleteWallpaper')}
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
               <div className={css.knobHint}>{t('aqua.wallpaperHint')}</div>
@@ -348,47 +360,19 @@ export function AquaAppearanceRow(props: AquaAppearanceRowComponentProps) {
       <div className={css.subGroup}>
         <div className={css.subTitle}>{t('aqua.decorAmbient')}</div>
         <div className={css.controls}>
-          <div className={css.row}>
-            <span className={css.rowLabel}>{t('aqua.whale')}</span>
-            <button
-              type="button"
-              className={whale ? css.toggleOn : css.toggle}
-              aria-pressed={whale}
-              onClick={() => { setWhale(!whale) }}
-            >
-              <span className={css.check}>
-                {whale && <IconCheckOutline16 />}
-              </span>
-              {whale ? t('aqua.enable') : t('aqua.disable')}
-            </button>
-          </div>
-          <div className={css.row}>
-            <span className={css.rowLabel}>{t('aqua.critters')}</span>
-            <button
-              type="button"
-              className={critters ? css.toggleOn : css.toggle}
-              aria-pressed={critters}
-              onClick={() => { setCritters(!critters) }}
-            >
-              <span className={css.check}>
-                {critters && <IconCheckOutline16 />}
-              </span>
-              {critters ? t('aqua.enable') : t('aqua.disable')}
-            </button>
-          </div>
-          <div className={css.row}>
-            <span className={css.rowLabel}>{t('aqua.mesh')}</span>
-            <button
-              type="button"
-              className={mesh ? css.toggleOn : css.toggle}
-              aria-pressed={mesh}
-              onClick={() => { setMesh(!mesh) }}
-            >
-              <span className={css.check}>
-                {mesh && <IconCheckOutline16 />}
-              </span>
-              {mesh ? t('aqua.enable') : t('aqua.disable')}
-            </button>
+          <div className={css.switchGrid}>
+            <div className={css.switchCell}>
+              <span className={css.switchLabel}>{t('aqua.whale')}</span>
+              <Toggle label={t('aqua.whale')} pressed={whale} onChange={setWhale} />
+            </div>
+            <div className={css.switchCell}>
+              <span className={css.switchLabel}>{t('aqua.critters')}</span>
+              <Toggle label={t('aqua.critters')} pressed={critters} onChange={setCritters} />
+            </div>
+            <div className={css.switchCell}>
+              <span className={css.switchLabel}>{t('aqua.mesh')}</span>
+              <Toggle label={t('aqua.mesh')} pressed={mesh} onChange={setMesh} />
+            </div>
           </div>
         </div>
       </div>
@@ -398,47 +382,19 @@ export function AquaAppearanceRow(props: AquaAppearanceRowComponentProps) {
         <div className={css.subGroup}>
           <div className={css.subTitle}>{t('aqua.decorHover')}</div>
           <div className={css.controls}>
-            <div className={css.row}>
-              <span className={css.rowLabel}>{t('aqua.spotlight')}</span>
-              <button
-                type="button"
-                className={spotlight ? css.toggleOn : css.toggle}
-                aria-pressed={spotlight}
-                onClick={() => { setSpotlight(!spotlight) }}
-              >
-                <span className={css.check}>
-                  {spotlight && <IconCheckOutline16 />}
-                </span>
-                {spotlight ? t('aqua.enable') : t('aqua.disable')}
-              </button>
-            </div>
-            <div className={css.row}>
-              <span className={css.rowLabel}>{t('aqua.rim')}</span>
-              <button
-                type="button"
-                className={rim ? css.toggleOn : css.toggle}
-                aria-pressed={rim}
-                onClick={() => { setRim(!rim) }}
-              >
-                <span className={css.check}>
-                  {rim && <IconCheckOutline16 />}
-                </span>
-                {rim ? t('aqua.enable') : t('aqua.disable')}
-              </button>
-            </div>
-            <div className={css.row}>
-              <span className={css.rowLabel}>{t('aqua.press')}</span>
-              <button
-                type="button"
-                className={press ? css.toggleOn : css.toggle}
-                aria-pressed={press}
-                onClick={() => { setPress(!press) }}
-              >
-                <span className={css.check}>
-                  {press && <IconCheckOutline16 />}
-                </span>
-                {press ? t('aqua.enable') : t('aqua.disable')}
-              </button>
+            <div className={css.switchGrid}>
+              <div className={css.switchCell}>
+                <span className={css.switchLabel}>{t('aqua.spotlight')}</span>
+                <Toggle label={t('aqua.spotlight')} pressed={spotlight} onChange={setSpotlight} />
+              </div>
+              <div className={css.switchCell}>
+                <span className={css.switchLabel}>{t('aqua.rim')}</span>
+                <Toggle label={t('aqua.rim')} pressed={rim} onChange={setRim} />
+              </div>
+              <div className={css.switchCell}>
+                <span className={css.switchLabel}>{t('aqua.press')}</span>
+                <Toggle label={t('aqua.press')} pressed={press} onChange={setPress} />
+              </div>
             </div>
           </div>
         </div>

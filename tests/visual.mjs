@@ -11,7 +11,16 @@ import { fileURLToPath } from 'node:url'
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const OUT = join(ROOT, 'tests', 'screenshots')
 const BASE = process.env.NICO_THEME_URL ?? 'http://127.0.0.1:18765'
-const VIEWPORT = { width: 1440, height: 900 }
+
+function parseViewport() {
+  const raw = process.env.NICO_THEME_VIEWPORT
+  if (raw === undefined || raw === '') return { width: 1440, height: 900 }
+  const match = /^(\d+)x(\d+)$/.exec(raw)
+  if (match === null) throw new Error(`NICO_THEME_VIEWPORT must use WIDTHxHEIGHT, got ${raw}`)
+  return { width: Number(match[1]), height: Number(match[2]) }
+}
+
+const VIEWPORT = parseViewport()
 
 const errors = []
 
@@ -60,13 +69,69 @@ async function htmlFlags(page) {
 }
 
 async function openSettings(page) {
-  const trigger = page.locator('button').filter({ hasText: /设置|Settings/ }).first()
+  const trigger = page.locator('button:has([data-slot="settings.trigger"])').first()
+    .or(page.getByRole('button', { name: /设置|Settings/ }).first())
   if (await trigger.count()) {
     await trigger.click()
-  } else {
+    await page.waitForTimeout(300)
+  }
+  if (await page.locator('[role="dialog"]').count() === 0) {
     await page.keyboard.press('Control+,')
+    await page.waitForTimeout(300)
   }
   await page.waitForTimeout(600)
+  if (await page.locator('[role="dialog"]').count() === 0) {
+    throw new Error('Settings dialog did not open')
+  }
+}
+
+async function assertAppearanceRow(page) {
+  const appearance = page.locator('[data-dsh-nico-appearance]')
+  if (await appearance.count() !== 1) throw new Error('Nico appearance row is missing')
+  if (await appearance.locator('input[type="range"]').count() < 4) {
+    throw new Error('Nico appearance row has too few range controls')
+  }
+  if (await appearance.locator('button[aria-pressed]').count() < 6) {
+    throw new Error('Nico appearance row has too few pressed controls')
+  }
+  if (await appearance.getByRole('button', { name: /^玻璃$|^Glass$/ }).count() !== 1) {
+    throw new Error('Nico mode segmented control is missing')
+  }
+  if (await appearance.getByRole('button', { name: /流体|Fluid/ }).count() !== 1) {
+    throw new Error('Nico backdrop segmented control is missing')
+  }
+  if (await appearance.locator('[role="group"][aria-label]').filter({ has: page.locator('button[aria-pressed="true"]') }).count() < 2) {
+    throw new Error('Nico choice card groups are missing')
+  }
+  if (await appearance.locator('img, [class*="thumb"]').count() < 2) {
+    throw new Error('Nico background thumbnails are missing')
+  }
+
+  const compat = appearance.getByRole('button', { name: /兼容|Compatibility/ })
+  if (await compat.count() !== 1) throw new Error('Nico compatibility mode control is missing')
+  await compat.click()
+  if (await appearance.getByText(/玻璃模糊度|Glass blur/).count() !== 0) {
+    throw new Error('Mica-only controls remain visible in compatibility mode')
+  }
+  await appearance.getByRole('button', { name: /^玻璃$|^Glass$/ }).click()
+
+  const wallpaper = appearance.getByRole('button', { name: /壁纸|Wallpaper/ }).first()
+  if (await wallpaper.count() !== 1) throw new Error('Nico wallpaper mode control is missing')
+  await wallpaper.click()
+  if (await appearance.locator('input[type="file"]').count() !== 2) {
+    throw new Error('Nico wallpaper file controls are missing')
+  }
+  await appearance.getByRole('button', { name: /流体|Fluid/ }).click()
+}
+
+function assertDialogFitsViewport(box, label) {
+  if (box === null) throw new Error(`${label} settings dialog has no layout box`)
+  if (box.width > VIEWPORT.width || box.x < 0 || box.x + box.width > VIEWPORT.width) {
+    throw new Error(`${label} settings dialog overflows viewport: ${JSON.stringify(box)}`)
+  }
+  if (VIEWPORT.width >= 480 && box.width < 480) {
+    throw new Error(`${label} settings dialog trapped at ${Math.round(box.width)}px`)
+  }
 }
 
 async function shot(page, name) {
@@ -104,6 +169,7 @@ try {
   if (await general.count()) await general.click()
   await page.waitForTimeout(400)
   await shot(page, '03-settings-appearance-knobs.png')
+  await assertAppearanceRow(page)
 
   await page.keyboard.press('Escape')
   await page.waitForTimeout(300)
@@ -193,7 +259,7 @@ try {
   await shot(page, '11-settings-refract-scrim.png')
   const dialog = page.locator('[role="dialog"]').first()
   const box = await dialog.boundingBox()
-  if (box && box.width < 480) throw new Error(`settings dialog trapped at ${Math.round(box.width)}px`)
+  assertDialogFitsViewport(box, 'refract/scrim')
 
   await page.keyboard.press('Escape')
   await page.waitForTimeout(300)
@@ -321,7 +387,7 @@ try {
   await shot(page, '14-settings-layers.png')
   const dialog2 = page.locator('[role="dialog"]').first()
   const box2 = await dialog2.boundingBox()
-  if (box2 && box2.width < 480) throw new Error(`settings dialog trapped at ${Math.round(box2.width)}px`)
+  assertDialogFitsViewport(box2, 'layer')
 
   const hard = errors.filter((line) => !/favicon|net::ERR/.test(line))
   if (hard.length) {

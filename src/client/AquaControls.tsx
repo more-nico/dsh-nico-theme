@@ -3,6 +3,7 @@
  * (stepless slider + number box), a two-option Segmented picker, and the
  * wallpaper file reader. Kept in one file so the row stays a single surface.
  */
+import type { CSSProperties, ReactNode } from 'react'
 import css from './AquaAppearanceRow.module.css'
 
 /** One slider + number box, wired to a single value. */
@@ -19,6 +20,9 @@ export interface KnobProps {
 /** Render one knob row. */
 export function Knob({ label, value, min, max, step, unit, onChange }: KnobProps) {
   const clamp = (n: number) => Math.min(max, Math.max(min, Number.isFinite(n) ? n : min))
+  const safeValue = clamp(value)
+  const progress = max > min ? ((safeValue - min) / (max - min)) * 100 : 0
+  const sliderStyle = { '--nico-progress': `${progress}%` } as CSSProperties
   return (
     <label className={css.knob}>
       <span className={css.knobLabel}>{label}</span>
@@ -28,7 +32,8 @@ export function Knob({ label, value, min, max, step, unit, onChange }: KnobProps
         min={min}
         max={max}
         step={step}
-        value={value}
+        value={safeValue}
+        style={sliderStyle}
         onChange={(e) => { onChange(clamp(Number(e.target.value))) }}
       />
       <span className={css.numberWrap}>
@@ -38,7 +43,7 @@ export function Knob({ label, value, min, max, step, unit, onChange }: KnobProps
           min={min}
           max={max}
           step={step}
-          value={value}
+          value={safeValue}
           onChange={(e) => { onChange(clamp(Number(e.target.value))) }}
         />
         <span className={css.unit}>{unit}</span>
@@ -51,6 +56,10 @@ export function Knob({ label, value, min, max, step, unit, onChange }: KnobProps
 export interface SegmentedOption<T extends string> {
   id: T
   label: string
+  /** Decorative visual above the label (icon or thumbnail); text stays the accessible name. */
+  visual?: ReactNode
+  /** Extra class hook for per-option visuals (e.g. the fluid gradient). */
+  visualClass?: string
 }
 
 export interface SegmentedProps<T extends string> {
@@ -59,24 +68,60 @@ export interface SegmentedProps<T extends string> {
   value: T
   options: readonly SegmentedOption<T>[]
   onSelect: (value: T) => void
+  /** `cards` renders the large two-column choice cards. */
+  variant?: 'compact' | 'cards'
 }
 
-/** Render a two-button segmented picker. */
-export function Segmented<T extends string>({ label, value, options, onSelect }: SegmentedProps<T>) {
+/** Render a two-button segmented picker (compact pills or large cards). */
+export function Segmented<T extends string>({ label, value, options, onSelect, variant = 'compact' }: SegmentedProps<T>) {
+  const groupClass = variant === 'cards' ? css.segmentedCards : css.segmented
   return (
-    <div className={css.segmented} role="group" aria-label={label}>
-      {options.map(option => (
-        <button
-          key={option.id}
-          type="button"
-          className={option.id === value ? css.segActive : css.seg}
-          aria-pressed={option.id === value}
-          onClick={() => { onSelect(option.id) }}
-        >
-          {option.label}
-        </button>
-      ))}
+    <div className={groupClass} role="group" aria-label={label}>
+      {options.map(option => {
+        const active = option.id === value
+        const buttonClass = variant === 'cards'
+          ? (active ? css.cardActive : css.card)
+          : (active ? css.segActive : css.seg)
+        return (
+          <button
+            key={option.id}
+            type="button"
+            className={buttonClass}
+            aria-pressed={active}
+            onClick={() => { onSelect(option.id) }}
+          >
+            {option.visual !== undefined && (
+              <span className={option.visualClass ?? css.cardVisual} aria-hidden="true">{option.visual}</span>
+            )}
+            <span>{option.label}</span>
+          </button>
+        )
+      })}
     </div>
+  )
+}
+
+export interface ToggleProps {
+  /** Accessible name for the setting represented by the switch. */
+  label: string
+  pressed: boolean
+  onChange: (pressed: boolean) => void
+}
+
+/** Render the compact switch used by every boolean appearance setting. */
+export function Toggle({ label, pressed, onChange }: ToggleProps) {
+  return (
+    <button
+      type="button"
+      className={pressed ? css.toggleOn : css.toggle}
+      aria-label={label}
+      aria-pressed={pressed}
+      onClick={() => { onChange(!pressed) }}
+    >
+      <span className={css.toggleTrack} aria-hidden="true">
+        <span className={css.toggleThumb} />
+      </span>
+    </button>
   )
 }
 

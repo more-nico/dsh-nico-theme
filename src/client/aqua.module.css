@@ -1040,10 +1040,15 @@ html[data-dsh-float][data-dsh-aqua-wallpaper][data-dsh-aqua-media='video'] body[
 [data-dsh-aqua][data-dsh-nico-scrim] [data-dsh-nico-pad='assistant'],
 [data-dsh-aqua][data-dsh-nico-scrim] [data-dsh-nico-pad='expand'] {
   box-sizing: border-box;
+  max-width: 100%;
+  min-width: 0;
   background: rgb(255 255 255 / var(--dsh-nico-scrim, 0.25));
   backdrop-filter: blur(var(--dsh-nico-scrim-blur, 5px)) saturate(100%);
   border-radius: 16px;
   padding: 10px 16px;
+  /* Pad itself no longer scrolls — wide tables get their own per-table
+     scrollbar below. Hidden keeps the rounded corners clipped. */
+  overflow: hidden;
 }
 
 [data-dsh-aqua][data-dsh-nico-scrim] body[data-ds-dark-theme] [data-dsh-nico-pad='assistant'],
@@ -1053,6 +1058,93 @@ html[data-dsh-float][data-dsh-aqua-wallpaper][data-dsh-aqua-media='video'] body[
 
 [data-dsh-aqua][data-dsh-nico-scrim] [data-dsh-nico-pad='user'] {
   backdrop-filter: blur(var(--dsh-nico-scrim-blur, 5px)) saturate(100%);
+}
+
+/* Per-table horizontal scroll: each table is wrapped in a
+   `[data-dsh-nico-table-wrap]` scroller by `reading-pad.ts` or the host
+   `tableScroll` container. In stock DSH, `.md-table-wide` uses negative
+   margins to spill into the chat gutter; inside a reading pad, reset it so
+   the scroller stays neatly contained inside the card with zero clipping. */
+[data-dsh-aqua] [data-dsh-nico-pad] [class*='tableScroll'],
+[data-dsh-aqua] [data-dsh-nico-pad] [class*='md-table-wide'],
+[data-dsh-aqua] [data-dsh-nico-pad] .md-table-wide,
+[data-dsh-aqua] [data-dsh-nico-table-wrap] {
+  display: block;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 8px 0 !important;
+  padding: 0 0 6px 0 !important;
+  box-sizing: border-box !important;
+  overflow-x: auto !important;
+  scrollbar-width: thin !important;
+  scrollbar-color: var(--dsw-alias-scrollbar-bg-l2) rgba(0, 0, 0, 0.08) !important;
+}
+
+[data-dsh-aqua] body[data-ds-dark-theme] [data-dsh-nico-pad] [class*='tableScroll'],
+[data-dsh-aqua] body[data-ds-dark-theme] [data-dsh-nico-table-wrap] {
+  scrollbar-color: var(--dsw-alias-scrollbar-bg-l2) rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-dsh-aqua] [class*='tableScroll']::-webkit-scrollbar,
+[data-dsh-aqua] [data-dsh-nico-table-wrap]::-webkit-scrollbar {
+  height: 6px;
+}
+
+[data-dsh-aqua] [class*='tableScroll']::-webkit-scrollbar-track,
+[data-dsh-aqua] [data-dsh-nico-table-wrap]::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.06);
+  border-radius: 999px;
+}
+
+[data-dsh-aqua] body[data-ds-dark-theme] [class*='tableScroll']::-webkit-scrollbar-track,
+[data-dsh-aqua] body[data-ds-dark-theme] [data-dsh-nico-table-wrap]::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+[data-dsh-aqua] [class*='tableScroll']::-webkit-scrollbar-thumb,
+[data-dsh-aqua] [data-dsh-nico-table-wrap]::-webkit-scrollbar-thumb {
+  background: var(--dsw-alias-scrollbar-bg-l2);
+  border-radius: 999px;
+}
+
+[data-dsh-aqua] [class*='tableScroll']::-webkit-scrollbar-thumb:hover,
+[data-dsh-aqua] [data-dsh-nico-table-wrap]::-webkit-scrollbar-thumb:hover {
+  background: var(--dsw-alias-scrollbar-hover-l2);
+}
+
+[data-dsh-aqua] [data-dsh-nico-pad] table,
+[data-dsh-aqua] [data-dsh-nico-table-wrap] table {
+  width: max-content !important;
+  min-width: 100% !important;
+  max-width: none !important;
+  table-layout: auto !important;
+  border-collapse: collapse !important;
+  margin: 0 !important;
+}
+
+[data-dsh-aqua] [data-dsh-nico-pad] th,
+[data-dsh-aqua] [data-dsh-nico-pad] td,
+[data-dsh-aqua] [data-dsh-nico-table-wrap] th,
+[data-dsh-aqua] [data-dsh-nico-table-wrap] td {
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+
+/* # column is just "1 / 2 / 3" — keep it narrow so other columns get space. */
+[data-dsh-aqua] [data-dsh-nico-pad] th:first-child,
+[data-dsh-aqua] [data-dsh-nico-pad] td:first-child,
+[data-dsh-aqua] [data-dsh-nico-table-wrap] th:first-child,
+[data-dsh-aqua] [data-dsh-nico-table-wrap] td:first-child {
+  width: 1%;
+  white-space: nowrap;
+}
+
+[data-dsh-aqua][data-dsh-nico-scrim] [data-dsh-nico-pad='assistant'] pre,
+[data-dsh-aqua][data-dsh-nico-scrim] [data-dsh-nico-pad='expand'] pre {
+  max-width: 100%;
+  overflow-x: auto;
+  white-space: pre;
+  -webkit-overflow-scrolling: touch;
 }
 
 [data-dsh-aqua][data-dsh-nico-home] [data-dsh-nico-pad] {

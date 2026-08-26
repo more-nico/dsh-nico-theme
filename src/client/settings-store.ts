@@ -49,6 +49,10 @@ export interface AquaRowState {
   refract: number
   /** Refraction master switch. */
   refractOn: boolean
+  /** Chromatic dispersion (spectral separation) 0-100. */
+  dispersion: number
+  /** Specular bevel sheen 0-100. */
+  specular: number
   /** Conversation pad opacity 0-100. */
   scrim: number
   /** Conversation pad blur, px. */
@@ -82,6 +86,8 @@ export interface AquaSettingsPayload {
   videoBrightness: number
   refract: number
   refractOn: boolean
+  dispersion: number
+  specular: number
   scrim: number
   scrimBlur: number
   rim: boolean
@@ -101,7 +107,7 @@ export function createAquaRowStore(): EngineStoreHandle<AquaRowState, AquaRowAct
     init: (): AquaRowState => ({
       enabled: true,
       mode: 'mica',
-      blur: 20,
+      blur: 3,
       frost: 7,
       fluidHue: 320,
       fluidDepth: 25,
@@ -120,6 +126,8 @@ export function createAquaRowStore(): EngineStoreHandle<AquaRowState, AquaRowAct
       videoBrightness: 45,
       refract: 15,
       refractOn: true,
+      dispersion: 25,
+      specular: 50,
       scrim: 25,
       scrimBlur: 5,
       rim: true,
@@ -149,6 +157,8 @@ export function createAquaRowStore(): EngineStoreHandle<AquaRowState, AquaRowAct
         d.videoBrightness = next.videoBrightness
         d.refract = next.refract
         d.refractOn = next.refractOn
+        d.dispersion = next.dispersion
+        d.specular = next.specular
         d.scrim = next.scrim
         d.scrimBlur = next.scrimBlur
         d.rim = next.rim

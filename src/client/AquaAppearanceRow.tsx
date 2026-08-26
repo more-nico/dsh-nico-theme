@@ -49,6 +49,40 @@ export interface AquaAppearanceRowInjected {
   setPress: (value: boolean) => void
   /** Set the wallpaper blur radius, px. */
   setWallpaperBlur: (value: number) => void
+import { loadVideoHandle, saveVideoBlob, saveVideoHandle } from './wallpaper-store.ts'
+import type { createAquaRowStore } from './settings-store.ts'
+import css from './AquaAppearanceRow.module.css'
+
+/** Injected business face: every knob write except the master switch. */
+export interface AquaAppearanceRowInjected {
+  /** Set the rendering mode. */
+  setMode: (value: 'mica' | 'compat') => void
+  /** Set the glass blur radius, px. */
+  setBlur: (value: number) => void
+  /** Set the glass frost amount, 0-100. */
+  setFrost: (value: number) => void
+  /** Set the fluid hue, degrees (0-360, continuous). */
+  setFluidHue: (value: number) => void
+  /** Set the fluid depth, 0-100 (continuous). */
+  setFluidDepth: (value: number) => void
+  /** Set the background brightness, 0-100 (0 = black, 50 = transparent, 100 = white). */
+  setBgBrightness: (value: number) => void
+  /** Set the backdrop source. */
+  setBackground: (value: 'fluid' | 'wallpaper') => void
+  /** Set the wallpaper image (a data URL). */
+  setWallpaper: (value: string) => void
+  /** Set the particle-whale flag. */
+  setWhale: (value: boolean) => void
+  /** Set the ambient marine-life flag. */
+  setCritters: (value: boolean) => void
+  /** Set the interactive-mesh flag. */
+  setMesh: (value: boolean) => void
+  /** Set the cursor-spotlight flag. */
+  setSpotlight: (value: boolean) => void
+  /** Set the hover-press flag. */
+  setPress: (value: boolean) => void
+  /** Set the wallpaper blur radius, px. */
+  setWallpaperBlur: (value: number) => void
   /** Set the wallpaper frost veil, 0-100. */
   setWallpaperFrost: (value: number) => void
   /** Set the video wallpaper blur radius, px. */
@@ -59,6 +93,8 @@ export interface AquaAppearanceRowInjected {
   authorizeVideo: () => void
   setRefract: (value: number) => void
   setRefractOn: (value: boolean) => void
+  setDispersion: (value: number) => void
+  setSpecular: (value: number) => void
   setScrim: (value: number) => void
   setScrimBlur: (value: number) => void
   setRim: (value: boolean) => void
@@ -79,7 +115,7 @@ export function AquaAppearanceRow(props: AquaAppearanceRowComponentProps) {
     t, setMode, setBlur, setFrost, setFluidHue, setFluidDepth, setBgBrightness,
     setBackground, setWallpaper, setWhale, setCritters, setMesh, setSpotlight, setPress,
     setWallpaperBlur, setWallpaperFrost, setVideoBlur, setVideoBrightness, authorizeVideo,
-    setRefract, setRefractOn, setScrim, setScrimBlur, setRim, useStore,
+    setRefract, setRefractOn, setDispersion, setSpecular, setScrim, setScrimBlur, setRim, useStore,
   } = props
   const enabled = useStore(s => s.enabled)
   const mode = useStore(s => s.mode)
@@ -102,6 +138,8 @@ export function AquaAppearanceRow(props: AquaAppearanceRowComponentProps) {
   const videoBrightness = useStore(s => s.videoBrightness)
   const refract = useStore(s => s.refract)
   const refractOn = useStore(s => s.refractOn)
+  const dispersion = useStore(s => s.dispersion)
+  const specular = useStore(s => s.specular)
   const scrim = useStore(s => s.scrim)
   const scrimBlur = useStore(s => s.scrimBlur)
   const rim = useStore(s => s.rim)
@@ -216,6 +254,7 @@ export function AquaAppearanceRow(props: AquaAppearanceRowComponentProps) {
           <div className={css.controls}>
             <Knob label={t('aqua.blur')} value={blur} min={0} max={40} step={0.5} unit="px" onChange={setBlur} />
             <Knob label={t('aqua.frost')} value={frost} min={0} max={100} step={1} unit="%" onChange={setFrost} />
+            <Knob label={t('aqua.specular')} value={specular} min={0} max={100} step={1} unit="%" onChange={setSpecular} />
             <div className={css.row}>
               <span className={css.rowLabel}>{t('aqua.refractOn')}</span>
               <div className={css.rowControl}>
@@ -223,7 +262,10 @@ export function AquaAppearanceRow(props: AquaAppearanceRowComponentProps) {
               </div>
             </div>
             {refractOn && (
-              <Knob label={t('aqua.refract')} value={refract} min={0} max={100} step={1} unit="%" onChange={setRefract} />
+              <>
+                <Knob label={t('aqua.refract')} value={refract} min={0} max={100} step={1} unit="%" onChange={setRefract} />
+                <Knob label={t('aqua.dispersion')} value={dispersion} min={0} max={100} step={1} unit="%" onChange={setDispersion} />
+              </>
             )}
           </div>
         </div>
@@ -259,7 +301,6 @@ export function AquaAppearanceRow(props: AquaAppearanceRowComponentProps) {
               />
             </div>
           </div>
-
           {background === 'fluid' && (
             <>
               <Knob label={t('aqua.fluidHue')} value={fluidHue} min={0} max={360} step={1} unit="°" onChange={setFluidHue} />

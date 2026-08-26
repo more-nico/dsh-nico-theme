@@ -40,6 +40,8 @@ export interface NicoSettingsPageInjected {
   authorizeVideo: () => void
   setRefract: (value: number) => void
   setRefractOn: (value: boolean) => void
+  setDispersion: (value: number) => void
+  setSpecular: (value: number) => void
   setScrim: (value: number) => void
   setScrimBlur: (value: number) => void
   setRim: (value: boolean) => void
@@ -56,7 +58,7 @@ export function NicoSettingsPage(props: NicoSettingsPageComponentProps) {
     setEnabled, setMode, setBlur, setFrost, setFluidHue, setFluidDepth, setBgBrightness,
     setBackground, setWallpaper, setWhale, setCritters, setMesh, setSpotlight, setPress,
     setWallpaperBlur, setWallpaperFrost, setVideoBlur, setVideoBrightness, authorizeVideo,
-    setRefract, setRefractOn, setScrim, setScrimBlur, setRim,
+    setRefract, setRefractOn, setDispersion, setSpecular, setScrim, setScrimBlur, setRim,
   } = props
 
   const enabled = useStore(s => s.enabled)
@@ -80,6 +82,8 @@ export function NicoSettingsPage(props: NicoSettingsPageComponentProps) {
   const videoBrightness = useStore(s => s.videoBrightness)
   const refract = useStore(s => s.refract)
   const refractOn = useStore(s => s.refractOn)
+  const dispersion = useStore(s => s.dispersion)
+  const specular = useStore(s => s.specular)
   const scrim = useStore(s => s.scrim)
   const scrimBlur = useStore(s => s.scrimBlur)
   const rim = useStore(s => s.rim)
@@ -200,6 +204,7 @@ export function NicoSettingsPage(props: NicoSettingsPageComponentProps) {
             <div className={rowCss.controls}>
               <Knob label={t('aqua.blur')} value={blur} min={0} max={40} step={0.5} unit="px" onChange={setBlur} />
               <Knob label={t('aqua.frost')} value={frost} min={0} max={100} step={1} unit="%" onChange={setFrost} />
+              <Knob label={t('aqua.specular')} value={specular} min={0} max={100} step={1} unit="%" onChange={setSpecular} />
               <div className={rowCss.row}>
                 <span className={rowCss.rowLabel}>{t('aqua.refractOn')}</span>
                 <div className={rowCss.rowControl}>
@@ -207,7 +212,10 @@ export function NicoSettingsPage(props: NicoSettingsPageComponentProps) {
                 </div>
               </div>
               {refractOn && (
-                <Knob label={t('aqua.refract')} value={refract} min={0} max={100} step={1} unit="%" onChange={setRefract} />
+                <>
+                  <Knob label={t('aqua.refract')} value={refract} min={0} max={100} step={1} unit="%" onChange={setRefract} />
+                  <Knob label={t('aqua.dispersion')} value={dispersion} min={0} max={100} step={1} unit="%" onChange={setDispersion} />
+                </>
               )}
             </div>
           </div>

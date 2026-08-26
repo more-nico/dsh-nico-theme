@@ -70,6 +70,8 @@ export function apply(ctx: ClientContext): void {
       videoBrightness: s.videoBrightness,
       refract: s.refract,
       refractOn: s.refractOn,
+      dispersion: s.dispersion,
+      specular: s.specular,
       scrim: s.scrim,
       scrimBlur: s.scrimBlur,
       rim: s.rim,
@@ -167,6 +169,14 @@ export function apply(ctx: ClientContext): void {
     },
     setRefractOn: (refractOn) => {
       layer.setRefractOn(refractOn)
+      sync()
+    },
+    setDispersion: (dispersion) => {
+      layer.setDispersion(dispersion)
+      sync()
+    },
+    setSpecular: (specular) => {
+      layer.setSpecular(specular)
       sync()
     },
     setScrim: (scrim) => {

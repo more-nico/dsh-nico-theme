@@ -53,8 +53,17 @@ export function startRim(active: () => boolean): () => void {
     if (!active()) return
     for (const el of rimTargets()) {
       const box = el.getBoundingClientRect()
-      el.style.setProperty('--dsh-nico-mx', `${pointerX - box.left}px`)
-      el.style.setProperty('--dsh-nico-my', `${pointerY - box.top}px`)
+      const relX = pointerX - box.left
+      const relY = pointerY - box.top
+      el.style.setProperty('--dsh-nico-mx', `${relX}px`)
+      el.style.setProperty('--dsh-nico-my', `${relY}px`)
+
+      // Calculate directional light angle and proximity for specular bevel
+      const normX = relX - box.width * 0.5
+      const normY = relY - box.height * 0.5
+      const angleRad = Math.atan2(normY, normX)
+      const angleDeg = ((angleRad * 180) / Math.PI + 360) % 360
+      el.style.setProperty('--dsh-nico-light-angle', `${angleDeg.toFixed(1)}deg`)
     }
   }
 

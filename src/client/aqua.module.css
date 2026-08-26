@@ -29,19 +29,21 @@
      reads yellow over the teal fluid). */
   --dsh-aqua-glass-card-light: rgb(255 255 255 / calc(0.42 * var(--dsh-aqua-frost, 1)));
   --dsh-aqua-glass-card-dark: rgb(36 36 38 / calc(0.50 * var(--dsh-aqua-frost, 1)));
-  --dsh-aqua-frost-filter: blur(var(--dsh-aqua-blur, 14px)) saturate(100%) contrast(1) brightness(1.08);
-  --dsh-aqua-glass-line: rgba(36, 38, 42, 0.24);
-  --dsh-aqua-glass-line-soft: rgba(36, 38, 42, 0.16);
-  --dsh-aqua-glass-elev: rgba(16, 16, 18, 0.14);
+  --dsh-aqua-frost-filter: blur(var(--dsh-aqua-blur, 3px)) saturate(100%) contrast(1) brightness(1.08);
+  --dsh-aqua-glass-line: rgba(36, 38, 42, 0.22);
+  --dsh-aqua-glass-line-soft: rgba(36, 38, 42, 0.14);
+  --dsh-aqua-glass-elev: rgba(16, 16, 18, 0.12);
   --dsh-nico-mx: 50%;
   --dsh-nico-my: 0%;
   --dsh-nico-rim-size: 260px;
+  --dsh-nico-specular: 0.5;
+  --dsh-nico-dispersion: 0.25;
 }
 
 [data-dsh-aqua]:has(body[data-ds-dark-theme]) {
-  --dsh-aqua-glass-line: rgba(220, 220, 224, 0.22);
-  --dsh-aqua-glass-line-soft: rgba(220, 220, 224, 0.16);
-  --dsh-aqua-glass-elev: rgba(0, 0, 0, 0.48);
+  --dsh-aqua-glass-line: rgba(220, 220, 224, 0.18);
+  --dsh-aqua-glass-line-soft: rgba(220, 220, 224, 0.12);
+  --dsh-aqua-glass-elev: rgba(0, 0, 0, 0.45);
 }
 
 [data-dsh-aqua] [data-dsh-frame] {
@@ -341,7 +343,7 @@
   background: rgb(255 255 255 / calc(0.62 * var(--dsh-aqua-surface-frost, 1)));
   border: 1px solid var(--dsh-aqua-glass-line-soft);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
-  backdrop-filter: blur(var(--dsh-aqua-blur, 14px));
+  backdrop-filter: blur(var(--dsh-aqua-blur, 3px));
 }
 
 [data-dsh-float] [data-dsh-surface]:hover:not(:disabled) {
@@ -382,7 +384,7 @@
   background: rgb(255 255 255 / calc(0.40 * var(--dsh-aqua-frost, 1)));
   border: 1px solid var(--dsh-aqua-glass-line-soft);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
-  backdrop-filter: blur(var(--dsh-aqua-blur, 14px));
+  backdrop-filter: blur(var(--dsh-aqua-blur, 3px));
 }
 
 [data-dsh-float] [data-dsh-add]:hover:not(:disabled) {
@@ -437,7 +439,9 @@ html[data-dsh-float][data-dsh-aqua-wallpaper][data-dsh-aqua-media='video'] body[
   background: var(--dsh-aqua-glass-card-light);
   border: 1px solid var(--dsh-aqua-glass-line);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 1.5px 0.5px rgb(255 255 255 / calc(0.85 * (0.5 + 0.5 * var(--dsh-nico-specular, 0.5)))),
+    inset 0 -1px 2px rgba(0, 30, 80, 0.05),
+    inset 0 0 10px rgba(255, 255, 255, 0.15),
     0 10px 36px var(--dsh-aqua-glass-elev);
   backdrop-filter: var(--dsh-aqua-fx, var(--dsh-aqua-frost-filter));
 }
@@ -446,7 +450,9 @@ html[data-dsh-float][data-dsh-aqua-wallpaper][data-dsh-aqua-media='video'] body[
   background: var(--dsh-aqua-glass-card-dark);
   border: 1px solid var(--dsh-aqua-glass-line);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    inset 0 1.5px 0.5px rgb(255 255 255 / calc(0.22 * (0.5 + 0.5 * var(--dsh-nico-specular, 0.5)))),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.45),
+    inset 0 0 10px rgba(255, 255, 255, 0.02),
     0 10px 36px var(--dsh-aqua-glass-elev);
 }
 
@@ -465,7 +471,9 @@ html[data-dsh-float][data-dsh-aqua-wallpaper][data-dsh-aqua-media='video'] body[
   border-radius: 24px;
   background: var(--dsh-aqua-glass-card-light);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 1.5px 0.5px rgb(255 255 255 / calc(0.85 * (0.5 + 0.5 * var(--dsh-nico-specular, 0.5)))),
+    inset 0 -1px 2px rgba(0, 30, 80, 0.05),
+    inset 0 0 10px rgba(255, 255, 255, 0.15),
     0 10px 36px var(--dsh-aqua-glass-elev);
   backdrop-filter: var(--dsh-aqua-fx, var(--dsh-aqua-frost-filter));
 }
@@ -474,7 +482,9 @@ html[data-dsh-float][data-dsh-aqua-wallpaper][data-dsh-aqua-media='video'] body[
   border-color: var(--dsh-aqua-glass-line);
   background: var(--dsh-aqua-glass-card-dark);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    inset 0 1.5px 0.5px rgb(255 255 255 / calc(0.22 * (0.5 + 0.5 * var(--dsh-nico-specular, 0.5)))),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.45),
+    inset 0 0 10px rgba(255, 255, 255, 0.02),
     0 10px 36px var(--dsh-aqua-glass-elev);
 }
 
@@ -544,7 +554,9 @@ html[data-dsh-float][data-dsh-aqua-wallpaper][data-dsh-aqua-media='video'] body[
   border-radius: 20px;
   background: var(--dsh-aqua-glass-card-light);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 1.5px 0.5px rgb(255 255 255 / calc(0.85 * (0.5 + 0.5 * var(--dsh-nico-specular, 0.5)))),
+    inset 0 -1px 2px rgba(0, 30, 80, 0.05),
+    inset 0 0 10px rgba(255, 255, 255, 0.15),
     0 10px 34px var(--dsh-aqua-glass-elev);
 }
 
@@ -573,7 +585,9 @@ html[data-dsh-float][data-dsh-aqua-wallpaper][data-dsh-aqua-media='video'] body[
   border-bottom-color: transparent;
   background: var(--dsh-aqua-glass-card-dark);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    inset 0 1.5px 0.5px rgb(255 255 255 / calc(0.22 * (0.5 + 0.5 * var(--dsh-nico-specular, 0.5)))),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.45),
+    inset 0 0 10px rgba(255, 255, 255, 0.02),
     0 8px 30px var(--dsh-aqua-glass-elev);
 }
 
@@ -599,7 +613,9 @@ html[data-dsh-float][data-dsh-aqua-wallpaper][data-dsh-aqua-media='video'] body[
   border-radius: 20px;
   background: var(--dsh-aqua-glass-card-light);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 1.5px 0.5px rgb(255 255 255 / calc(0.85 * (0.5 + 0.5 * var(--dsh-nico-specular, 0.5)))),
+    inset 0 -1px 2px rgba(0, 30, 80, 0.05),
+    inset 0 0 10px rgba(255, 255, 255, 0.15),
     0 10px 34px var(--dsh-aqua-glass-elev);
 }
 
@@ -624,7 +640,9 @@ html[data-dsh-float][data-dsh-aqua-wallpaper][data-dsh-aqua-media='video'] body[
   border-right: 1px solid var(--dsh-aqua-glass-line-soft);
   background: var(--dsh-aqua-glass-card-dark);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    inset 0 1.5px 0.5px rgb(255 255 255 / calc(0.22 * (0.5 + 0.5 * var(--dsh-nico-specular, 0.5)))),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.45),
+    inset 0 0 10px rgba(255, 255, 255, 0.02),
     0 8px 30px var(--dsh-aqua-glass-elev);
 }
 
@@ -672,7 +690,9 @@ html[data-dsh-float][data-dsh-aqua-wallpaper][data-dsh-aqua-media='video'] body[
   border-radius: 20px;
   background: var(--dsh-aqua-glass-card-light);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 1.5px 0.5px rgb(255 255 255 / calc(0.85 * (0.5 + 0.5 * var(--dsh-nico-specular, 0.5)))),
+    inset 0 -1px 2px rgba(0, 30, 80, 0.05),
+    inset 0 0 10px rgba(255, 255, 255, 0.15),
     0 10px 34px var(--dsh-aqua-glass-elev);
   backdrop-filter: var(--dsh-aqua-fx, var(--dsh-aqua-frost-filter));
   overflow: hidden;
@@ -682,7 +702,9 @@ html[data-dsh-float][data-dsh-aqua-wallpaper][data-dsh-aqua-media='video'] body[
   border-color: var(--dsh-aqua-glass-line);
   background: var(--dsh-aqua-glass-card-dark);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    inset 0 1.5px 0.5px rgb(255 255 255 / calc(0.22 * (0.5 + 0.5 * var(--dsh-nico-specular, 0.5)))),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.45),
+    inset 0 0 10px rgba(255, 255, 255, 0.02),
     0 8px 30px var(--dsh-aqua-glass-elev);
 }
 
@@ -906,7 +928,7 @@ html[data-dsh-float][data-dsh-aqua-wallpaper][data-dsh-aqua-media='video'] body[
    (standard `backdrop-filter` only —see the composer card note). */
 [data-dsh-float] [role='menu'] {
   background: rgb(255 255 255 / calc(0.62 * var(--dsh-aqua-frost, 1)));
-  backdrop-filter: blur(var(--dsh-aqua-blur, 14px));
+  backdrop-filter: blur(var(--dsh-aqua-blur, 3px));
 }
 
 /* Dialogs keep their native token surface (bg-layer-2) and radius; no
@@ -1153,7 +1175,7 @@ html[data-dsh-float][data-dsh-aqua-wallpaper][data-dsh-aqua-media='video'] body[
   padding: 0;
 }
 
-/* Pointer rim: 1px edge wash, not the in-pane spotlight. */
+/* Pointer rim: 1px edge wash with Kyant0 dual-component specular lighting (ambient directional bevel + pointer hotspot). */
 [data-dsh-nico-rim] .dsh-nico-rim {
   position: absolute;
   inset: 0;
@@ -1162,13 +1184,21 @@ html[data-dsh-float][data-dsh-aqua-wallpaper][data-dsh-aqua-media='video'] body[
   pointer-events: none;
   border-radius: inherit;
   padding: 1px;
-  background: radial-gradient(
-    var(--dsh-nico-rim-size, 260px) circle at var(--dsh-nico-mx, 50%) var(--dsh-nico-my, 0%),
-    rgba(255, 255, 255, 0.82) 0%,
-    rgba(255, 255, 255, 0.28) 30%,
-    rgba(255, 255, 255, 0.08) 55%,
-    transparent 74%
-  );
+  background:
+    linear-gradient(
+      var(--dsh-nico-light-angle, 135deg),
+      rgb(255 255 255 / calc(0.65 * var(--dsh-nico-specular, 0.5))) 0%,
+      rgb(255 255 255 / calc(0.18 * var(--dsh-nico-specular, 0.5))) 35%,
+      transparent 60%,
+      rgb(255 255 255 / calc(0.10 * var(--dsh-nico-specular, 0.5))) 100%
+    ),
+    radial-gradient(
+      var(--dsh-nico-rim-size, 260px) circle at var(--dsh-nico-mx, 50%) var(--dsh-nico-my, 0%),
+      rgb(255 255 255 / calc(0.85 * (0.5 + 0.5 * var(--dsh-nico-specular, 0.5)))) 0%,
+      rgb(255 255 255 / calc(0.30 * (0.5 + 0.5 * var(--dsh-nico-specular, 0.5)))) 30%,
+      rgb(255 255 255 / calc(0.08 * (0.5 + 0.5 * var(--dsh-nico-specular, 0.5)))) 55%,
+      transparent 74%
+    );
   -webkit-mask:
     linear-gradient(#000 0 0) content-box,
     linear-gradient(#000 0 0);

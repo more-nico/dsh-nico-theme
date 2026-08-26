@@ -257,6 +257,10 @@ export interface AquaSettings {
   refract: number
   /** Master for edge refraction (value is kept when off). */
   refractOn: boolean
+  /** Chromatic dispersion 0-100. */
+  dispersion: number
+  /** Specular bevel sheen 0-100. */
+  specular: number
   /** Conversation reading-pad opacity 0-100. */
   scrim: number
   /** Conversation reading-pad blur, px. */
@@ -268,7 +272,7 @@ export interface AquaSettings {
 /** Shipped defaults — what a first-time install sees (the tuned look). */
 const SETTINGS_DEFAULTS: AquaSettings = {
   mode: 'mica',
-  blur: 20,
+  blur: 3,
   frost: 7,
   bgBrightness: 50,
   background: 'fluid',
@@ -286,6 +290,8 @@ const SETTINGS_DEFAULTS: AquaSettings = {
   videoBrightness: 45,
   refract: 15,
   refractOn: true,
+  dispersion: 25,
+  specular: 50,
   scrim: 25,
   scrimBlur: 5,
   rim: true,
@@ -303,6 +309,8 @@ const NUMERIC_KEYS = {
   videoBlur: 'dsh.ui-aqua.videoBlur',
   videoBrightness: 'dsh.ui-aqua.videoBrightness',
   refract: 'dsh.ui-aqua.refract',
+  dispersion: 'dsh.ui-aqua.dispersion',
+  specular: 'dsh.ui-aqua.specular',
   scrim: 'dsh.ui-aqua.scrim',
   scrimBlur: 'dsh.ui-aqua.scrimBlur',
 } as const
@@ -648,6 +656,8 @@ export class AquaLayer {
       videoBrightness: readSetting('videoBrightness'),
       refract: readSetting('refract'),
       refractOn: readFlag(REFRACT_ON_KEY, true),
+      dispersion: readSetting('dispersion'),
+      specular: readSetting('specular'),
       scrim: readSetting('scrim'),
       scrimBlur: readSetting('scrimBlur'),
       rim: readFlag(RIM_KEY, true),
@@ -834,6 +844,22 @@ export class AquaLayer {
     if (this.enabled) this.applySettings()
   }
 
+  setDispersion(value: number): void {
+    const next = clampSetting('dispersion', value)
+    if (next === this.settings.dispersion) return
+    this.settings.dispersion = next
+    writeSetting('dispersion', next)
+    if (this.enabled) this.applySettings()
+  }
+
+  setSpecular(value: number): void {
+    const next = clampSetting('specular', value)
+    if (next === this.settings.specular) return
+    this.settings.specular = next
+    writeSetting('specular', next)
+    if (this.enabled) this.applySettings()
+  }
+
   setScrim(value: number): void {
     const next = clampSetting('scrim', value)
     if (next === this.settings.scrim) return
@@ -916,6 +942,8 @@ export class AquaLayer {
 
     style.setProperty('--dsh-nico-scrim', String(this.settings.scrim / 100))
     style.setProperty('--dsh-nico-scrim-blur', `${this.settings.scrimBlur}px`)
+    style.setProperty('--dsh-nico-dispersion', String(this.settings.dispersion / 100))
+    style.setProperty('--dsh-nico-specular', String(this.settings.specular / 100))
     document.documentElement.toggleAttribute(
       'data-dsh-nico-scrim',
       this.settings.scrim > 0 || this.settings.scrimBlur > 0,
@@ -926,6 +954,8 @@ export class AquaLayer {
       blur: this.settings.blur,
       refract: this.settings.refract,
       refractOn: this.settings.refractOn,
+      dispersion: this.settings.dispersion,
+      specular: this.settings.specular,
     })
 
     // Backdrop source: flip the ambient container between fluid and wallpaper.
@@ -1056,6 +1086,8 @@ export class AquaLayer {
       blur: this.settings.blur,
       refract: this.settings.refract,
       refractOn: this.settings.refractOn,
+      dispersion: this.settings.dispersion,
+      specular: this.settings.specular,
     }))
     this.padDisposer?.()
     this.padDisposer = startReadingPads(() => (

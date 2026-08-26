@@ -1,0 +1,5 @@
+# Registers the Nico glass theme into the profile's browser roster.
+#   dsh plugin --profile <name> add .
+- insert:
+    - id: ui-nico
+      name: 'dsh-nico-theme'

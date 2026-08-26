@@ -1,0 +1,26 @@
+# dependencies
+node_modules/
+
+# local tooling / OS
+.npm-stage/
+.dsh-test/
+.DS_Store
+Thumbs.db
+*.log
+.env
+.env.*
+
+# editors
+.idea/
+.vscode/
+*.swp
+
+# build junk (ship lib/*.js + lib/types/**/*.d.ts)
+lib/tsconfig.tsbuildinfo
+lib/**/*.map
+lib/types/**/*.js
+lib/types/**/*.js.map
+lib/types/**/*.d.ts.map
+
+# Playwright debug dumps. README shots live in assets/.
+tests/screenshots/

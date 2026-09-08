@@ -50,4 +50,3 @@ export interface FluidShaderHandle {
  * @returns the live handle.
  */
 export declare function attachFluidShader(canvas: HTMLCanvasElement, params: FluidParams): FluidShaderHandle;
-//# sourceMappingURL=fluid-shader.d.ts.map

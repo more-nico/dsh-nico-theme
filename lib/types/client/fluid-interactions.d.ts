@@ -17,4 +17,3 @@ export interface FluidTargets {
  * @returns disposer removing every listener.
  */
 export declare function attachFluidInteractions(targets: FluidTargets): () => void;
-//# sourceMappingURL=fluid-interactions.d.ts.map

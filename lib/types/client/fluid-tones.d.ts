@@ -24,4 +24,3 @@ export declare const HUE_BASE = 217;
  * sweeps from mid to pale (#FFCCCB for red). Stepless HSL interpolation.
  */
 export declare function fluidToneColors(dark: boolean, hue: number, depth: number): FluidToneColors;
-//# sourceMappingURL=fluid-tones.d.ts.map

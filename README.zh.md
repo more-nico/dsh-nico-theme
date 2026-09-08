@@ -17,7 +17,7 @@
 
 ## 来源
 
-本仓库是 [WYH66666666/DSH-Transparent-UI-Plugin](https://github.com/WYH66666666/DSH-Transparent-UI-Plugin) 的 **fork**（MIT，© 2026 John Wu），适配 **DSH 0.1.1-rc.2**。
+本仓库是 [WYH66666666/DSH-Transparent-UI-Plugin](https://github.com/WYH66666666/DSH-Transparent-UI-Plugin) 的 **fork**（MIT，© 2026 John Wu），适配 **DSH 0.1.2-rc.1**。
 
 圆角 SDF 位移图 → SVG `feDisplacementMap` → 叠在 `backdrop-filter` 模糊上的折射，沿用 [shuding/liquid-glass](https://github.com/shuding/liquid-glass)（MIT，© Shu Ding）里的液态玻璃着色方式。
 
@@ -32,7 +32,7 @@
 
 ## 环境
 
-- `@deepseek-ai/dsh@0.1.1-rc.2`（或 0.1.1 更新的 rc）
+- `@deepseek-ai/dsh@0.1.2-rc.1`（或 0.1.2 更新的 rc）
 - Node.js 22+
 
 ## 安装
@@ -45,7 +45,7 @@ DSH 插件装在 **profile** 里，不是全局 `dsh`。`dsh plugin add` 会在�
 dsh plugin --profile web add dsh-nico-theme@latest
 ```
 
-然后重启 `dsh web`。在 **设置 → 插件** 打开 **Nico 玻璃主题**。旋钮在 **设置 → 通用设置 → 外观**。
+然后重启 `dsh web`。在 **设置 → 插件** 打开 **Nico 玻璃主题**。所有旋钮都在设置左侧导航的 **Nico 主题** 独立页。
 
 单独试、不动日常 `web`：
 
@@ -67,7 +67,8 @@ dsh plugin --profile nico-theme-test add .
 
 ```sh
 pnpm install
-pnpm bundle
+pnpm bundle          # tsdown + lib/types/*.d.ts
+pnpm typecheck       # 用已安装的 DSH client 包跑 tsc --noEmit
 pnpm visual          # 对测试 profile 跑 Playwright
 pnpm readme-shots    # 刷新 assets/ 里的深色流体截图
 ```

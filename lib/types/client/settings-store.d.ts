@@ -3,7 +3,7 @@
  * knobs and the backdrop source). The plugin's apply-world change listener is
  * the only writer; the row component reads via props.useStore.
  */
-import { type EngineStoreHandle } from '@deepseek-ai/dsh-client-runtime/client';
+import { type EngineStoreHandle } from '@deepseek-ai/dsh-client-store';
 /** Store state mirrored from the Aqua settings scope. */
 export interface AquaRowState {
     /** Persisted layer enable flag. */
@@ -44,6 +44,20 @@ export interface AquaRowState {
     videoBlur: number;
     /** Video wallpaper brightness, 0-100. */
     videoBrightness: number;
+    /** Liquid-glass edge refraction 0-100. */
+    refract: number;
+    /** Refraction master switch. */
+    refractOn: boolean;
+    /** Chromatic dispersion (spectral separation) 0-100. */
+    dispersion: number;
+    /** Specular bevel sheen 0-100. */
+    specular: number;
+    /** Conversation pad opacity 0-100. */
+    scrim: number;
+    /** Conversation pad blur, px. */
+    scrimBlur: number;
+    /** Pointer-centered 1px rim. */
+    rim: boolean;
     /** Monotonic revision; -1 until first sync so revision 0 lands as a change. */
     revision: number;
 }
@@ -68,6 +82,13 @@ export interface AquaSettingsPayload {
     wallpaperFrost: number;
     videoBlur: number;
     videoBrightness: number;
+    refract: number;
+    refractOn: boolean;
+    dispersion: number;
+    specular: number;
+    scrim: number;
+    scrimBlur: number;
+    rim: boolean;
 }
 /** Declared action shape giving the exported factory a stable return type. */
 type AquaRowActions = {
@@ -79,4 +100,3 @@ type AquaRowActions = {
  */
 export declare function createAquaRowStore(): EngineStoreHandle<AquaRowState, AquaRowActions>;
 export {};
-//# sourceMappingURL=settings-store.d.ts.map

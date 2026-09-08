@@ -49,40 +49,6 @@ export interface AquaAppearanceRowInjected {
   setPress: (value: boolean) => void
   /** Set the wallpaper blur radius, px. */
   setWallpaperBlur: (value: number) => void
-import { loadVideoHandle, saveVideoBlob, saveVideoHandle } from './wallpaper-store.ts'
-import type { createAquaRowStore } from './settings-store.ts'
-import css from './AquaAppearanceRow.module.css'
-
-/** Injected business face: every knob write except the master switch. */
-export interface AquaAppearanceRowInjected {
-  /** Set the rendering mode. */
-  setMode: (value: 'mica' | 'compat') => void
-  /** Set the glass blur radius, px. */
-  setBlur: (value: number) => void
-  /** Set the glass frost amount, 0-100. */
-  setFrost: (value: number) => void
-  /** Set the fluid hue, degrees (0-360, continuous). */
-  setFluidHue: (value: number) => void
-  /** Set the fluid depth, 0-100 (continuous). */
-  setFluidDepth: (value: number) => void
-  /** Set the background brightness, 0-100 (0 = black, 50 = transparent, 100 = white). */
-  setBgBrightness: (value: number) => void
-  /** Set the backdrop source. */
-  setBackground: (value: 'fluid' | 'wallpaper') => void
-  /** Set the wallpaper image (a data URL). */
-  setWallpaper: (value: string) => void
-  /** Set the particle-whale flag. */
-  setWhale: (value: boolean) => void
-  /** Set the ambient marine-life flag. */
-  setCritters: (value: boolean) => void
-  /** Set the interactive-mesh flag. */
-  setMesh: (value: boolean) => void
-  /** Set the cursor-spotlight flag. */
-  setSpotlight: (value: boolean) => void
-  /** Set the hover-press flag. */
-  setPress: (value: boolean) => void
-  /** Set the wallpaper blur radius, px. */
-  setWallpaperBlur: (value: number) => void
   /** Set the wallpaper frost veil, 0-100. */
   setWallpaperFrost: (value: number) => void
   /** Set the video wallpaper blur radius, px. */
@@ -154,10 +120,12 @@ export function AquaAppearanceRow(props: AquaAppearanceRowComponentProps) {
    *  file authorization, so later visits re-read the ORIGINAL file with no
    *  storage copy. Other browsers fall back to the plain file input. */
   const pickVideo = (): void => {
-    if (window.showOpenFilePicker !== undefined) {
+    // Hoisted: property narrowing does not survive into the async closure.
+    const picker = window.showOpenFilePicker
+    if (picker !== undefined) {
       void (async () => {
         try {
-          const [handle] = await window.showOpenFilePicker({
+          const [handle] = await picker({
             multiple: false,
             types: [{ description: 'Video', accept: { 'video/*': ['.mp4', '.webm', '.ogg', '.mov', '.m4v', '.mkv'] } }],
           })

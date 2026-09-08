@@ -38,13 +38,19 @@ export interface AquaAppearanceRowInjected {
     setVideoBrightness: (value: number) => void;
     /** Re-read the fsa: video after the user re-granted file access. */
     authorizeVideo: () => void;
+    setRefract: (value: number) => void;
+    setRefractOn: (value: boolean) => void;
+    setDispersion: (value: number) => void;
+    setSpecular: (value: number) => void;
+    setScrim: (value: number) => void;
+    setScrimBlur: (value: number) => void;
+    setRim: (value: boolean) => void;
 }
 /** Full component props: runtime share + store share + locale seat + injected face. */
-export type AquaAppearanceRowComponentProps = PropsRuntime<'settings.general.item'> & PropsStore<ReturnType<typeof createAquaRowStore>> & PropsLocale<'settings.aqua'> & AquaAppearanceRowInjected;
+export type AquaAppearanceRowComponentProps = PropsRuntime<'settings.general.item'> & PropsStore<ReturnType<typeof createAquaRowStore>> & PropsLocale<'settings.nico'> & AquaAppearanceRowInjected;
 /**
  * Render the Aqua appearance row.
  * @param props - composed slot props.
  * @returns the General section row.
  */
 export declare function AquaAppearanceRow(props: AquaAppearanceRowComponentProps): import("react").JSX.Element | null;
-//# sourceMappingURL=AquaAppearanceRow.d.ts.map

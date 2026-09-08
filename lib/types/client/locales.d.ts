@@ -1,6 +1,6 @@
-/** `settings.aqua` namespace dictionaries (the settings-row copy). */
+/** `settings.nico` namespace dictionaries (the settings-row copy). */
 /** Dictionary namespace owned by this plugin. */
-export declare const NS = "settings.aqua";
+export declare const NS = "settings.nico";
 /** Simplified Chinese dictionary (the key-set source of truth). */
 export declare const zh: {
     'aqua.title': string;
@@ -38,12 +38,25 @@ export declare const zh: {
     'aqua.videoBlur': string;
     'aqua.videoBrightness': string;
     'aqua.videoHint': string;
+    'aqua.refractOn': string;
+    'aqua.refract': string;
+    'aqua.dispersion': string;
+    'aqua.specular': string;
+    'aqua.scrimGroup': string;
+    'aqua.scrim': string;
+    'aqua.scrimBlur': string;
+    'aqua.rim': string;
+    'aqua.pageTitle': string;
+    'aqua.pageSubtitle': string;
+    'aqua.disabledNotice': string;
+    'aqua.enableTheme': string;
+    'aqua.disableTheme': string;
 };
 export type AquaLocaleKey = keyof typeof zh;
 declare module '@deepseek-ai/dsh-client-ui-slots' {
     interface LocaleNamespaceMap {
-        /** The Aqua settings row's copy. */
-        'settings.aqua': AquaLocaleKey;
+        /** The Nico settings row's copy. */
+        'settings.nico': AquaLocaleKey;
     }
 }
 /** English dictionary. */
@@ -83,5 +96,17 @@ export declare const en: {
     'aqua.videoBlur': string;
     'aqua.videoBrightness': string;
     'aqua.videoHint': string;
+    'aqua.refractOn': string;
+    'aqua.refract': string;
+    'aqua.dispersion': string;
+    'aqua.specular': string;
+    'aqua.scrimGroup': string;
+    'aqua.scrim': string;
+    'aqua.scrimBlur': string;
+    'aqua.rim': string;
+    'aqua.pageTitle': string;
+    'aqua.pageSubtitle': string;
+    'aqua.disabledNotice': string;
+    'aqua.enableTheme': string;
+    'aqua.disableTheme': string;
 };
-//# sourceMappingURL=locales.d.ts.map

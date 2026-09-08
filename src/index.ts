@@ -11,7 +11,6 @@
 
 import type { Context } from '@deepseek-ai/cordis'
 import z from '@deepseek-ai/schemastery'
-import { settingsNamespace } from '@deepseek-ai/dsh-settings'
 
 /** Settings namespace the Nico card claims in the configurable-plugins tab. */
 export const NICO_SETTINGS_NAMESPACE = 'nico'
@@ -29,7 +28,9 @@ export const NicoSettingsSchema: z<NicoSettings> = z.object({
 
 /** Host plugin body: serve the `nico` settings namespace for the card slot. */
 export function apply(ctx: Context): void {
+  // DSH 0.1.2 dropped the `settingsNamespace()` brander: `register` now takes
+  // the namespace string itself and validates it against the branded shape.
   ctx.inject(['settings'], (settingsCtx) => {
-    settingsCtx.settings.register(settingsNamespace(NICO_SETTINGS_NAMESPACE), NicoSettingsSchema)
+    settingsCtx.settings.register(NICO_SETTINGS_NAMESPACE, NicoSettingsSchema)
   })
 }

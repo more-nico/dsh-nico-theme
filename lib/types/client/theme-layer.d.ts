@@ -59,6 +59,20 @@ export interface AquaSettings {
     videoBlur: number;
     /** Video wallpaper brightness, 0-100 (100 = fully lit, 0 = deepest dim). */
     videoBrightness: number;
+    /** Liquid-glass edge refraction 0-100. */
+    refract: number;
+    /** Master for edge refraction (value is kept when off). */
+    refractOn: boolean;
+    /** Chromatic dispersion 0-100. */
+    dispersion: number;
+    /** Specular bevel sheen 0-100. */
+    specular: number;
+    /** Conversation reading-pad opacity 0-100. */
+    scrim: number;
+    /** Conversation reading-pad blur, px. */
+    scrimBlur: number;
+    /** Pointer-centered 1px rim on mica panes. */
+    rim: boolean;
 }
 /**
  * Owns the Aqua layer lifecycle: reads the durable enable flag, and applies /
@@ -77,6 +91,9 @@ export declare class AquaLayer {
     private themeListener;
     private seamDisposer;
     private spotlightDisposer;
+    private refractDisposer;
+    private padDisposer;
+    private rimDisposer;
     private whaleHandle;
     private meshHandle;
     /** Object URL of the current large-video wallpaper (revoked on replace). */
@@ -135,6 +152,13 @@ export declare class AquaLayer {
     setVideoBlur(value: number): void;
     /** Set the video wallpaper brightness (0-100, 100 = fully lit). */
     setVideoBrightness(value: number): void;
+    setRefract(value: number): void;
+    setRefractOn(value: boolean): void;
+    setDispersion(value: number): void;
+    setSpecular(value: number): void;
+    setScrim(value: number): void;
+    setScrimBlur(value: number): void;
+    setRim(value: boolean): void;
     /** After the user re-grants file access (选择视频 click on an fsa: video),
      *  drop the mount guard and re-apply so the file is re-read and played. */
     authorizeVideo(): void;
@@ -165,4 +189,3 @@ export declare class AquaLayer {
     /** Attach the cursor-spotlight pointer feeds (idempotent per mount). */
     private startSpotlightFeed;
 }
-//# sourceMappingURL=theme-layer.d.ts.map

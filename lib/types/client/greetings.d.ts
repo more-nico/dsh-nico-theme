@@ -22,4 +22,3 @@ export declare function resetHeroCopy(locale: string): void;
  * @returns the placeholder string.
  */
 export declare function aquaPlaceholder(locale: string): string;
-//# sourceMappingURL=greetings.d.ts.map

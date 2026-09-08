@@ -19,4 +19,3 @@
  * @returns a disposer that disconnects the observer.
  */
 export declare function startSeamStamper(): () => void;
-//# sourceMappingURL=seam-stamper.d.ts.map

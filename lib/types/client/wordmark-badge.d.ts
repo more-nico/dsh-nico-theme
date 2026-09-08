@@ -23,4 +23,3 @@ export interface BadgeHandle {
  * @returns the handle.
  */
 export declare function startWordmarkBadge(dark: boolean): BadgeHandle;
-//# sourceMappingURL=wordmark-badge.d.ts.map

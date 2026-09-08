@@ -17,7 +17,7 @@ Not affiliated with DeepSeek.
 
 ## Origins
 
-This repository is a **fork** of [WYH66666666/DSH-Transparent-UI-Plugin](https://github.com/WYH66666666/DSH-Transparent-UI-Plugin) (MIT, © 2026 John Wu), adapted for **DSH 0.1.1-rc.2**.
+This repository is a **fork** of [WYH66666666/DSH-Transparent-UI-Plugin](https://github.com/WYH66666666/DSH-Transparent-UI-Plugin) (MIT, © 2026 John Wu), adapted for **DSH 0.1.2-rc.1**.
 
 The edge refraction — rounded-rect SDF displacement maps fed into SVG `feDisplacementMap`, then stacked with `backdrop-filter` blur — follows the copy-paste liquid-glass shader in [shuding/liquid-glass](https://github.com/shuding/liquid-glass) (MIT, © Shu Ding).
 
@@ -32,7 +32,7 @@ The edge refraction — rounded-rect SDF displacement maps fed into SVG `feDispl
 
 ## Requirements
 
-- `@deepseek-ai/dsh@0.1.1-rc.2` (or newer in the 0.1.1 line)
+- `@deepseek-ai/dsh@0.1.2-rc.1` (or newer in the 0.1.2 line)
 - Node.js 22+
 
 ## Install
@@ -45,7 +45,7 @@ Daily Web UI:
 dsh plugin --profile web add dsh-nico-theme@latest
 ```
 
-Then restart `dsh web`. Enable **Nico glass theme** in Settings → Plugins. Knobs sit under Settings → General → Appearance.
+Then restart `dsh web`. Enable **Nico glass theme** in Settings → Plugins. Every knob lives on the dedicated **Nico Theme** page in the settings left nav.
 
 A throwaway profile (does not touch `web`):
 
@@ -67,7 +67,8 @@ dsh plugin --profile nico-theme-test add .
 
 ```sh
 pnpm install
-pnpm bundle
+pnpm bundle          # tsdown + lib/types/*.d.ts
+pnpm typecheck       # tsc --noEmit against the installed DSH client packages
 pnpm visual          # Playwright checks against the test profile
 pnpm readme-shots    # refresh the dark-fluid images in assets/
 ```

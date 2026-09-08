@@ -5,6 +5,25 @@
  * hands it to the <video> element — no quota trouble, survives restarts.
  */
 declare global {
+    /** File System Access permission descriptor: the DOM lib carries the handle
+     *  classes but none of the WICG permission surface. */
+    interface FileSystemHandlePermissionDescriptor {
+        /** Requested access mode. */
+        mode?: 'read' | 'readwrite';
+    }
+    /** Permission surface of the File System Access handle (Chromium). */
+    interface FileSystemFileHandle {
+        /**
+         * Read the current permission state without prompting.
+         * @param descriptor - requested access mode.
+         */
+        queryPermission(descriptor?: FileSystemHandlePermissionDescriptor): Promise<PermissionState>;
+        /**
+         * Prompt for the requested access.
+         * @param descriptor - requested access mode.
+         */
+        requestPermission(descriptor?: FileSystemHandlePermissionDescriptor): Promise<PermissionState>;
+    }
     interface Window {
         /** Chromium-only File System Access picker (absent elsewhere). */
         showOpenFilePicker?: (options?: {
@@ -28,4 +47,3 @@ export declare function deleteVideoBlob(id: string): Promise<void>;
 export declare function saveVideoHandle(handle: FileSystemFileHandle): Promise<boolean>;
 /** Load the remembered file handle (null when absent or storage fails). */
 export declare function loadVideoHandle(): Promise<FileSystemFileHandle | null>;
-//# sourceMappingURL=wallpaper-store.d.ts.map

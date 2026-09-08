@@ -23,4 +23,3 @@ export interface WhaleHandle {
  * @returns the handle.
  */
 export declare function mountWhale(host: HTMLElement, dark: boolean): WhaleHandle;
-//# sourceMappingURL=whale.d.ts.map

@@ -19,4 +19,3 @@ export declare function removeAmbientScene(): void;
 export declare function ensurePageFades(): void;
 /** Remove the edge-fade bands. */
 export declare function removePageFades(): void;
-//# sourceMappingURL=critters.d.ts.map

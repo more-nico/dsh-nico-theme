@@ -85,43 +85,49 @@ async function openSettings(page) {
   }
 }
 
-async function assertAppearanceRow(page) {
-  const appearance = page.locator('[data-dsh-nico-appearance]')
-  if (await appearance.count() !== 1) throw new Error('Nico appearance row is missing')
-  if (await appearance.locator('input[type="range"]').count() < 4) {
-    throw new Error('Nico appearance row has too few range controls')
+/**
+ * The Nico knobs live on their own left-nav settings page
+ * (`settings.section`, id `nico`) since the General → Appearance row was
+ * dropped; assert against that page.
+ * @param page - Playwright page with the settings dialog open on the Nico section.
+ */
+async function assertNicoSettingsPage(page) {
+  const section = page.locator('[data-dsh-nico-page]')
+  if (await section.count() !== 1) throw new Error('Nico settings page is missing')
+  if (await section.locator('input[type="range"]').count() < 4) {
+    throw new Error('Nico settings page has too few range controls')
   }
-  if (await appearance.locator('button[aria-pressed]').count() < 6) {
-    throw new Error('Nico appearance row has too few pressed controls')
+  if (await section.locator('button[aria-pressed]').count() < 6) {
+    throw new Error('Nico settings page has too few pressed controls')
   }
-  if (await appearance.getByRole('button', { name: /^玻璃$|^Glass$/ }).count() !== 1) {
+  if (await section.getByRole('button', { name: /^玻璃$|^Glass$/ }).count() !== 1) {
     throw new Error('Nico mode segmented control is missing')
   }
-  if (await appearance.getByRole('button', { name: /流体|Fluid/ }).count() !== 1) {
+  if (await section.getByRole('button', { name: /流体|Fluid/ }).count() !== 1) {
     throw new Error('Nico backdrop segmented control is missing')
   }
-  if (await appearance.locator('[role="group"][aria-label]').filter({ has: page.locator('button[aria-pressed="true"]') }).count() < 2) {
+  if (await section.locator('[role="group"][aria-label]').filter({ has: page.locator('button[aria-pressed="true"]') }).count() < 2) {
     throw new Error('Nico choice card groups are missing')
   }
-  if (await appearance.locator('img, [class*="thumb"]').count() < 2) {
+  if (await section.locator('img, [class*="thumb"]').count() < 2) {
     throw new Error('Nico background thumbnails are missing')
   }
 
-  const compat = appearance.getByRole('button', { name: /兼容|Compatibility/ })
+  const compat = section.getByRole('button', { name: /兼容|Compatibility/ })
   if (await compat.count() !== 1) throw new Error('Nico compatibility mode control is missing')
   await compat.click()
-  if (await appearance.getByText(/玻璃模糊度|Glass blur/).count() !== 0) {
+  if (await section.getByText(/玻璃模糊度|Glass blur/).count() !== 0) {
     throw new Error('Mica-only controls remain visible in compatibility mode')
   }
-  await appearance.getByRole('button', { name: /^玻璃$|^Glass$/ }).click()
+  await section.getByRole('button', { name: /^玻璃$|^Glass$/ }).click()
 
-  const wallpaper = appearance.getByRole('button', { name: /壁纸|Wallpaper/ }).first()
+  const wallpaper = section.getByRole('button', { name: /壁纸|Wallpaper/ }).first()
   if (await wallpaper.count() !== 1) throw new Error('Nico wallpaper mode control is missing')
   await wallpaper.click()
-  if (await appearance.locator('input[type="file"]').count() !== 2) {
+  if (await section.locator('input[type="file"]').count() !== 2) {
     throw new Error('Nico wallpaper file controls are missing')
   }
-  await appearance.getByRole('button', { name: /流体|Fluid/ }).click()
+  await section.getByRole('button', { name: /流体|Fluid/ }).click()
 }
 
 function assertDialogFitsViewport(box, label) {
@@ -165,11 +171,12 @@ try {
   const nico = page.getByText(/Nico 玻璃主题|Nico glass theme/).first()
   if (await nico.count() === 0) throw new Error('Nico plugin card not visible in Settings → Plugins')
 
-  const general = page.getByText(/通用设置|General/).first()
-  if (await general.count()) await general.click()
+  const nicoNav = page.getByText(/^Nico 主题$|^Nico Theme$/).first()
+  if (await nicoNav.count() !== 1) throw new Error('Nico settings page entry is missing from the left nav')
+  await nicoNav.click()
   await page.waitForTimeout(400)
-  await shot(page, '03-settings-appearance-knobs.png')
-  await assertAppearanceRow(page)
+  await shot(page, '03-settings-nico-page.png')
+  await assertNicoSettingsPage(page)
 
   await page.keyboard.press('Escape')
   await page.waitForTimeout(300)
@@ -253,8 +260,8 @@ try {
   await page.evaluate(() => document.body?.removeAttribute('data-ds-dark-theme'))
 
   await openSettings(page)
-  const generalAgain = page.getByText(/通用设置|General/).first()
-  if (await generalAgain.count()) await generalAgain.click()
+  const nicoAgain = page.getByText(/^Nico 主题$|^Nico Theme$/).first()
+  if (await nicoAgain.count()) await nicoAgain.click()
   await page.waitForTimeout(400)
   await shot(page, '11-settings-refract-scrim.png')
   const dialog = page.locator('[role="dialog"]').first()

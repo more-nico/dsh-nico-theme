@@ -93,10 +93,12 @@ export function NicoSettingsPage(props: NicoSettingsPageComponentProps) {
   const isVideoWallpaper = wallpaper.startsWith('data:video/') || wallpaper.startsWith('idb:') || wallpaper.startsWith('fsa:')
 
   const pickVideo = (): void => {
-    if (window.showOpenFilePicker !== undefined) {
+    // Hoisted: property narrowing does not survive into the async closure.
+    const picker = window.showOpenFilePicker
+    if (picker !== undefined) {
       void (async () => {
         try {
-          const [handle] = await window.showOpenFilePicker({
+          const [handle] = await picker({
             multiple: false,
             types: [{ description: 'Video', accept: { 'video/*': ['.mp4', '.webm', '.ogg', '.mov', '.m4v', '.mkv'] } }],
           })

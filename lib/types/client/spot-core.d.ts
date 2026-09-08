@@ -50,4 +50,3 @@ export declare function ensureGlow(spot: HTMLElement): HTMLElement;
  * @returns a disposer that removes every injected glow div.
  */
 export declare function startOverlayKeeper(onChange: () => void): () => void;
-//# sourceMappingURL=spot-core.d.ts.map

@@ -9,4 +9,3 @@ export declare const PRESS_ATTRIBUTE = "data-dsh-aqua-press";
  * @returns a disposer that drops listeners, overlays, and inline styles.
  */
 export declare function startSpotlight(): () => void;
-//# sourceMappingURL=spotlight.d.ts.map

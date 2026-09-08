@@ -9,8 +9,15 @@
  * One click on the master switch returns the stock UI (every layer is an
  * effect, disposed on flip).
  */
-import type { ClientContext } from '@deepseek-ai/dsh-client-runtime/client'
+// The client context is the plain cordis Context since DSH 0.1.2: the former
+// @deepseek-ai/dsh-client-runtime package was split into dsh-client-store
+// (store engine) and dsh-client-ui-renderer (SlotRegistry service).
+import type { Context as ClientContext } from '@deepseek-ai/cordis'
 import type { BoundActions } from '@deepseek-ai/dsh-client-ui-slots'
+// Type-only: pulls the `slots` service augmentation (`ctx.slots`) — the
+// SlotRegistry moved from dsh-client-runtime to dsh-client-ui-renderer in
+// DSH 0.1.2.
+import type {} from '@deepseek-ai/dsh-client-ui-renderer/client'
 // Type-only: pulls the `settings.plugin.item` SlotMap merge.
 import type {} from '@deepseek-ai/dsh-client-ui-settings-plugins/client'
 // Type-only: pulls the settings SlotMap merge (`settings.section`).

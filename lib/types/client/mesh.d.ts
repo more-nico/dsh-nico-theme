@@ -16,4 +16,3 @@ export interface MeshHandle {
  * @returns the handle.
  */
 export declare function mountMesh(host: HTMLElement): MeshHandle;
-//# sourceMappingURL=mesh.d.ts.map

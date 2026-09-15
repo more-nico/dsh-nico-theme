@@ -5,6 +5,7 @@
  */
 import { readFile } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
+import { createRequire } from 'node:module'
 import { basename, dirname, isAbsolute, resolve as resolvePath } from 'node:path'
 import type { UserConfig } from 'tsdown'
 import { transform } from 'lightningcss'
@@ -53,6 +54,25 @@ function sourceAssetPath(source: string, importer: string): string {
   return emitted
 }
 
+const require = createRequire(import.meta.url)
+
+/**
+ * Resolve a plain (side-effect) CSS import to a real file. Bare specifiers
+ * (`nico-glass-kit/style.css`) must go through the package resolver — plain
+ * path joining would produce a nonexistent sibling directory.
+ */
+function plainCssPath(source: string, importer: string | undefined): string {
+  if (importer !== undefined) {
+    const relative = resolvePath(dirname(importer), source)
+    if (existsSync(relative)) return relative
+  }
+  try {
+    return require.resolve(source)
+  } catch {
+    return importer !== undefined ? resolvePath(dirname(importer), source) : source
+  }
+}
+
 function cssPlugins(id: string): NonNullable<UserConfig['plugins']> {
   return [
     {
@@ -85,7 +105,7 @@ function cssPlugins(id: string): NonNullable<UserConfig['plugins']> {
       resolveId(source: string, importer: string | undefined) {
         if (!source.endsWith('.css') || source.endsWith('.module.css') || source.includes('?')) return null
         if (source.startsWith('\0')) return null
-        const abs = importer !== undefined ? sourceAssetPath(source, importer) : source
+        const abs = plainCssPath(source, importer)
         return GLOBAL_CSS_VIRTUAL_PREFIX + abs + CSS_VIRTUAL_SUFFIX
       },
       async load(virtualId: string) {

@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.0
+
+- **面板玻璃改为由 [nico-glass-kit](https://github.com/more-nico/nico-glass-kit) `^0.3.0` 渲染**：header / 侧栏 / 作曲器 / 各 dock / 弹窗 / 后台任务 popover / 新建会话胶囊等 14 个面板统一注入 underlay 并 portal `GlassSurface`，圆角统一 32px；自绘玻璃配方与自研 SDF 折射（`refract.ts`）、鼠标辉光/压下（`spotlight.ts` / `spot-core.ts`）、鼠标描边（`rim.ts`）、粒子鲸鱼（`whale.ts`）、网状交互（`mesh.ts`）全部删除
+- **材质参数换成 kit 刻度**：玻璃模糊度 0-64px / 亮度 0-2 / 折射强度 0-100% / 折射深度 0-40px / 边缘曲率 0-1 / 边缘色散 0-100% / 边缘高光 0-2，默认值 = playground 默认（blur 3、brightness 1.1、refraction 100%、depth 8、curvature 0.2、dispersion 10%、highlight 1）；旧项 磨砂度 / 边缘光泽 / 折射开关 删除（kit 无对应语义）
+- **「悬停效果」改为 kit 弹性**（开关 + 强度 0-0.5，默认开）、删除「环境装饰」整组与鼠标辉光 / 鼠标描边 / 悬停下压；悬停时玻璃与其上的面板内容一起倾斜（指针转发 + `.ngs-motion` 位移镜像），裁剪自身溢出的宿主保持刚性，`prefers-reduced-motion` 下整体停用
+- 设置页控件全部换成 kit 组件（`GlassSlider` / `GlassInput` / `GlassSwitch` / `GlassSegmentedControl` / `GlassButton`），页面用 `GlassProvider` 包裹；模式 / 背景选择器沿用 playground device 底栏的胶囊语言：外胶囊内嵌、槽位同内边距内缩成胶囊（圆角同心）、选中态就是 kit 的 active 胶囊填充
+- 首帧兜底：surface 就绪前由宿主 `::before` 画与 kit low tier 逐项一致的 CSS 磨砂，交接不跳变
+- 关掉插件或切换到兼容模式后不残留 underlay 与宿主钩子；兼容模式仍为 token 级半透明玻璃，不建 pane
+- 构建：`dsh-css-global-inline` 支持裸说明符 CSS（`nico-glass-kit/style.css` 内联）；新增 `@types/react-dom`、`react-dom` peer
+- `tests/visual.mjs` 仍断言旧的 refract / spot / press 实现，本次未更新（会失败，重写留待后续）；本轮验证用临时探针脚本完成
+
 ## 0.2.0
 
 - 适配 DSH **0.1.2-rc.1**（客户端模块表变更）：`@deepseek-ai/dsh-client-runtime` 已拆包，`defineStore` / `EngineStoreHandle` / `BoundActions` 改从 `@deepseek-ai/dsh-client-store` 导入；`ClientContext` 改用 `@deepseek-ai/cordis` 的 `Context`；`ctx.slots` 的类型改由 `@deepseek-ai/dsh-client-ui-renderer/client` 提供。旧版 bundle 在 0.1.2 上会直接报 `require("@deepseek-ai/dsh-client-runtime/client") missed the module table` 而整块主题不加载

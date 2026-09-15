@@ -44,26 +44,6 @@ const SEAMS: readonly Seam[] = [
   { attribute: 'data-dsh-stats', selector: '[data-slot="conversation.composer.dock"] [class*="root"]' },
   // Session-header background-jobs popover (a <ul>, not role=menu).
   { attribute: 'data-dsh-jobs', selector: 'ul[aria-label="后台任务"], ul[aria-label="Background jobs"]' },
-  // Spotlight / hover-tilt panes: the floating-glass surfaces the cursor
-  // glow and the geometric press target. The inputbar (composer + its
-  // docked stats band) is ONE spot so the fused piece tilts and glows
-  // together; the small + bead and chat bubbles stay out so the effect
-  // reads as "the glass panes", not every surface. Dock strips, composer
-  // takeovers, and the jobs popover press on their own visual face.
-  { attribute: 'data-dsh-aqua-spot', selector: 'header', first: true },
-  { attribute: 'data-dsh-aqua-spot', selector: '[class*="sidebarCol"]', first: true },
-  { attribute: 'data-dsh-aqua-spot', selector: '[data-dsh-inputbar]' },
-  { attribute: 'data-dsh-aqua-spot', selector: '[data-dsh-trajectory]' },
-  { attribute: 'data-dsh-aqua-spot', selector: '[data-dsh-surface]' },
-  { attribute: 'data-dsh-aqua-spot', selector: '[data-testid="todo-panel"]' },
-  { attribute: 'data-dsh-aqua-spot', selector: '[data-goal-bar] > *' },
-  { attribute: 'data-dsh-aqua-spot', selector: '[data-question-key] > section' },
-  { attribute: 'data-dsh-aqua-spot', selector: '[data-plan-review-key] > section' },
-  { attribute: 'data-dsh-aqua-spot', selector: '[data-approval-key] > *' },
-  { attribute: 'data-dsh-aqua-spot', selector: '[data-queue-dock] > *' },
-  { attribute: 'data-dsh-aqua-spot', selector: '[data-dsh-jobs]' },
-  // The sidebar wordmark button (its badge plate gets the official pill).
-  { attribute: 'data-dsh-wordmark', selector: '[class*="sidebarCol"] [class*="brand"]', first: true },
 ]
 
 function stamp(seam: Seam): void {

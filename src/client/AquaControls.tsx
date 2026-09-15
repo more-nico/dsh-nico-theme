@@ -1,9 +1,11 @@
 /**
- * Shared controls for the Aqua General-settings appearance row: the Knob
- * (stepless slider + number box), a two-option Segmented picker, and the
- * wallpaper file reader. Kept in one file so the row stays a single surface.
+ * Shared controls for the Nico settings page, built on nico-glass-kit: the
+ * Knob (glass slider + number field), a segmented picker, the switch, and the
+ * wallpaper/action capsule buttons. Kept in one file so the page stays a
+ * single surface.
  */
-import type { CSSProperties, ReactNode } from 'react'
+import type { ReactNode } from 'react'
+import { GlassButton, GlassInput, GlassSegmentedControl, GlassSlider, GlassSwitch } from 'nico-glass-kit'
 import css from './AquaAppearanceRow.module.css'
 
 /** One slider + number box, wired to a single value. */
@@ -21,25 +23,22 @@ export interface KnobProps {
 export function Knob({ label, value, min, max, step, unit, onChange }: KnobProps) {
   const clamp = (n: number) => Math.min(max, Math.max(min, Number.isFinite(n) ? n : min))
   const safeValue = clamp(value)
-  const progress = max > min ? ((safeValue - min) / (max - min)) * 100 : 0
-  const sliderStyle = { '--nico-progress': `${progress}%` } as CSSProperties
   return (
     <label className={css.knob}>
       <span className={css.knobLabel}>{label}</span>
-      <input
-        type="range"
+      <GlassSlider
         className={css.slider}
         min={min}
         max={max}
         step={step}
         value={safeValue}
-        style={sliderStyle}
-        onChange={(e) => { onChange(clamp(Number(e.target.value))) }}
+        onChange={(next) => { onChange(clamp(next)) }}
       />
       <span className={css.numberWrap}>
-        <input
-          type="number"
+        <GlassInput
           className={css.number}
+          type="number"
+          size="sm"
           min={min}
           max={max}
           step={step}
@@ -72,32 +71,22 @@ export interface SegmentedProps<T extends string> {
   variant?: 'compact' | 'cards'
 }
 
-/** Render a two-button segmented picker (compact pills or large cards). */
+/** Render a two-option segmented picker (compact pills or large cards). */
 export function Segmented<T extends string>({ label, value, options, onSelect, variant = 'compact' }: SegmentedProps<T>) {
-  const groupClass = variant === 'cards' ? css.segmentedCards : css.segmented
   return (
-    <div className={groupClass} role="group" aria-label={label}>
-      {options.map(option => {
-        const active = option.id === value
-        const buttonClass = variant === 'cards'
-          ? (active ? css.cardActive : css.card)
-          : (active ? css.segActive : css.seg)
-        return (
-          <button
-            key={option.id}
-            type="button"
-            className={buttonClass}
-            aria-pressed={active}
-            onClick={() => { onSelect(option.id) }}
-          >
-            {option.visual !== undefined && (
-              <span className={option.visualClass ?? css.cardVisual} aria-hidden="true">{option.visual}</span>
-            )}
-            <span>{option.label}</span>
-          </button>
-        )
-      })}
-    </div>
+    <GlassSegmentedControl
+      className={variant === 'cards' ? css.segmentedCards : css.segmented}
+      aria-label={label}
+      items={options.map(option => ({
+        key: option.id,
+        label: option.label,
+        icon: option.visual !== undefined && (
+          <span className={option.visualClass ?? css.cardVisual}>{option.visual}</span>
+        ),
+      }))}
+      value={value}
+      onChange={(key) => { onSelect(key as T) }}
+    />
   )
 }
 
@@ -111,17 +100,32 @@ export interface ToggleProps {
 /** Render the compact switch used by every boolean appearance setting. */
 export function Toggle({ label, pressed, onChange }: ToggleProps) {
   return (
-    <button
-      type="button"
-      className={pressed ? css.toggleOn : css.toggle}
+    <GlassSwitch
+      className={css.toggle}
       aria-label={label}
-      aria-pressed={pressed}
-      onClick={() => { onChange(!pressed) }}
+      checked={pressed}
+      onChange={onChange}
+    />
+  )
+}
+
+export interface PickButtonProps {
+  children: ReactNode
+  onClick: () => void
+  /** Destructive action (delete wallpaper). */
+  danger?: boolean
+}
+
+/** Capsule action button (choose image / choose video / delete / enable). */
+export function PickButton({ children, onClick, danger = false }: PickButtonProps) {
+  return (
+    <GlassButton
+      className={danger ? `${css.pickButton} ${css.deleteButton}` : css.pickButton}
+      size="sm"
+      onClick={onClick}
     >
-      <span className={css.toggleTrack} aria-hidden="true">
-        <span className={css.toggleThumb} />
-      </span>
-    </button>
+      {children}
+    </GlassButton>
   )
 }
 

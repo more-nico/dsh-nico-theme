@@ -1,7 +1,7 @@
 {
   "name": "dsh-nico-theme",
-  "description": "Nico glass theme for DeepSeek Harness Web UI — fork of DSH-Transparent-UI-Plugin with shuding/liquid-glass refraction. Adapted for DSH 0.1.2-rc.1. Not affiliated with DeepSeek.",
-  "version": "0.2.0",
+  "description": "Nico glass theme for DeepSeek Harness Web UI — glass material rendered by nico-glass-kit. Adapted for DSH 0.1.2-rc.1. Not affiliated with DeepSeek.",
+  "version": "0.3.0",
   "private": false,
   "repository": {
     "type": "git",
@@ -81,7 +81,8 @@
     "@deepseek-ai/dsh-client-ui-slots": "^0.1.2-rc.1",
     "@deepseek-ai/dsh-client-ui-theme": "^0.1.2-rc.1",
     "@deepseek-ai/dsh-invariants": "^0.1.2-rc.1",
-    "react": "^18.2.0"
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
     "@deepseek-ai/cordis": "^4.0.2",
@@ -97,7 +98,9 @@
     "@deepseek-ai/dsh-settings": "^0.1.2-rc.1",
     "@deepseek-ai/schemastery": "^3.18.2",
     "@types/react": "~18.3.1",
+    "@types/react-dom": "^18.3.7",
     "lightningcss": "^1.32.0",
+    "nico-glass-kit": "0.3.0",
     "playwright": "^1.55.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

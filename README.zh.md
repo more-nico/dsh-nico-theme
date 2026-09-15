@@ -19,15 +19,15 @@
 
 本仓库是 [WYH66666666/DSH-Transparent-UI-Plugin](https://github.com/WYH66666666/DSH-Transparent-UI-Plugin) 的 **fork**（MIT，© 2026 John Wu），适配 **DSH 0.1.2-rc.1**。
 
-圆角 SDF 位移图 → SVG `feDisplacementMap` → 叠在 `backdrop-filter` 模糊上的折射，沿用 [shuding/liquid-glass](https://github.com/shuding/liquid-glass)（MIT，© Shu Ding）里的液态玻璃着色方式。
+面板玻璃（折射、倒角、着色、边缘高光、弹性）由 [nico-glass-kit](https://github.com/more-nico/nico-glass-kit)（`^0.3.0`，MIT）渲染；流体背景、壁纸层与会话垫层是本仓库自己的 CSS / canvas 实现。
 
 ## 功能
 
-- **云母** 浮动玻璃卡片，或 **兼容** 模式（原生布局 + 磨砂材质）
+- **云母** 浮动玻璃面板（统一 32px 圆角，nico-glass-kit 材质），或 **兼容** 模式（原生布局 + 磨砂材质）
 - 流体背景（色调 / 深浅可调）；可选图片或视频壁纸
-- 顶栏、侧栏、发送框、停靠条、接管卡、后台任务下拉的液态折射
+- 按 kit 刻度调节材质：模糊度、亮度、折射强度、折射深度、边缘曲率、边缘色散、边缘高光
+- 悬停 **弹性**：玻璃与面板内容一起倾斜
 - 会话阅读垫层（只垫用户气泡和 AI 主正文）
-- 鼠标辉光、悬停下压、1px 描边（均可关）
 - 不含自适应字色
 
 ## 环境
@@ -80,4 +80,4 @@ pnpm readme-shots    # 刷新 assets/ 里的深色流体截图
 [MIT](LICENSE)
 
 - Fork 自 [DSH-Transparent-UI-Plugin](https://github.com/WYH66666666/DSH-Transparent-UI-Plugin)（MIT）
-- 液态玻璃折射手法来自 [shuding/liquid-glass](https://github.com/shuding/liquid-glass)（MIT）
+- 玻璃材质来自 [nico-glass-kit](https://github.com/more-nico/nico-glass-kit)（MIT）

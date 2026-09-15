@@ -8,12 +8,26 @@ import { type EngineStoreHandle } from '@deepseek-ai/dsh-client-store';
 export interface AquaRowState {
     /** Persisted layer enable flag. */
     enabled: boolean;
-    /** Rendering mode: mica or stock layout with generic glass. */
+    /** Rendering mode: mica (kit panes) or stock layout with generic glass. */
     mode: 'mica' | 'compat';
-    /** Glass blur radius, px. */
+    /** Kit optics blur radius, px. */
     blur: number;
-    /** Glass frost amount, 0-100. */
-    frost: number;
+    /** Kit optics brightness multiplier, 0-2. */
+    brightness: number;
+    /** Kit optics refraction strength, 0-100. */
+    refraction: number;
+    /** Kit optics refraction band width, px. */
+    depth: number;
+    /** Kit optics bevel curvature, 0-1. */
+    curvature: number;
+    /** Kit optics chromatic dispersion, 0-100. */
+    dispersion: number;
+    /** Rim-light strength, 0-2. */
+    highlight: number;
+    /** Mouse elasticity master. */
+    elasticity: boolean;
+    /** Mouse elasticity strength, 0-0.5. */
+    elasticityStrength: number;
     /** Fluid hue, degrees (0-360, continuous). */
     fluidHue: number;
     /** Fluid depth, 0-100 (continuous). */
@@ -26,16 +40,6 @@ export interface AquaRowState {
     background: 'fluid' | 'wallpaper';
     /** Wallpaper image data URL. */
     wallpaper: string;
-    /** Particle whale in the chat area center. */
-    whale: boolean;
-    /** Ambient marine life (fish / bubbles / plankton). */
-    critters: boolean;
-    /** Interactive mesh (the site's dot-grid with pointer repel). */
-    mesh: boolean;
-    /** Cursor spotlight glow following the pointer over the glass panes. */
-    spotlight: boolean;
-    /** Hover press-down for the glass panes. */
-    press: boolean;
     /** Wallpaper blur radius, px. */
     wallpaperBlur: number;
     /** Wallpaper frost veil, 0-100. */
@@ -44,20 +48,10 @@ export interface AquaRowState {
     videoBlur: number;
     /** Video wallpaper brightness, 0-100. */
     videoBrightness: number;
-    /** Liquid-glass edge refraction 0-100. */
-    refract: number;
-    /** Refraction master switch. */
-    refractOn: boolean;
-    /** Chromatic dispersion (spectral separation) 0-100. */
-    dispersion: number;
-    /** Specular bevel sheen 0-100. */
-    specular: number;
     /** Conversation pad opacity 0-100. */
     scrim: number;
     /** Conversation pad blur, px. */
     scrimBlur: number;
-    /** Pointer-centered 1px rim. */
-    rim: boolean;
     /** Monotonic revision; -1 until first sync so revision 0 lands as a change. */
     revision: number;
 }
@@ -66,29 +60,26 @@ export interface AquaSettingsPayload {
     enabled: boolean;
     mode: 'mica' | 'compat';
     blur: number;
-    frost: number;
+    brightness: number;
+    refraction: number;
+    depth: number;
+    curvature: number;
+    dispersion: number;
+    highlight: number;
+    elasticity: boolean;
+    elasticityStrength: number;
     fluidHue: number;
     fluidDepth: number;
     bgBrightness: number;
     dark: boolean;
     background: 'fluid' | 'wallpaper';
     wallpaper: string;
-    whale: boolean;
-    critters: boolean;
-    mesh: boolean;
-    spotlight: boolean;
-    press: boolean;
     wallpaperBlur: number;
     wallpaperFrost: number;
     videoBlur: number;
     videoBrightness: number;
-    refract: number;
-    refractOn: boolean;
-    dispersion: number;
-    specular: number;
     scrim: number;
     scrimBlur: number;
-    rim: boolean;
 }
 /** Declared action shape giving the exported factory a stable return type. */
 type AquaRowActions = {

@@ -59,29 +59,26 @@ export function apply(ctx: ClientContext): void {
       enabled: layer.getEnabled(),
       mode: s.mode,
       blur: s.blur,
-      frost: s.frost,
+      brightness: s.brightness,
+      refraction: s.refraction,
+      depth: s.depth,
+      curvature: s.curvature,
+      dispersion: s.dispersion,
+      highlight: s.highlight,
+      elasticity: s.elasticity,
+      elasticityStrength: s.elasticityStrength,
       fluidHue: s.fluidHue,
       fluidDepth: s.fluidDepth,
       bgBrightness: s.bgBrightness,
       dark: layer.getDark(),
       background: s.background,
       wallpaper: s.wallpaper,
-      whale: s.whale,
-      critters: s.critters,
-      mesh: s.mesh,
-      spotlight: s.spotlight,
-      press: s.press,
       wallpaperBlur: s.wallpaperBlur,
       wallpaperFrost: s.wallpaperFrost,
       videoBlur: s.videoBlur,
       videoBrightness: s.videoBrightness,
-      refract: s.refract,
-      refractOn: s.refractOn,
-      dispersion: s.dispersion,
-      specular: s.specular,
       scrim: s.scrim,
       scrimBlur: s.scrimBlur,
-      rim: s.rim,
     }
   }
   const sync = (): void => {
@@ -107,8 +104,36 @@ export function apply(ctx: ClientContext): void {
       layer.setBlur(blur)
       sync()
     },
-    setFrost: (frost) => {
-      layer.setFrost(frost)
+    setBrightness: (brightness) => {
+      layer.setBrightness(brightness)
+      sync()
+    },
+    setRefraction: (refraction) => {
+      layer.setRefraction(refraction)
+      sync()
+    },
+    setDepth: (depth) => {
+      layer.setDepth(depth)
+      sync()
+    },
+    setCurvature: (curvature) => {
+      layer.setCurvature(curvature)
+      sync()
+    },
+    setDispersion: (dispersion) => {
+      layer.setDispersion(dispersion)
+      sync()
+    },
+    setHighlight: (highlight) => {
+      layer.setHighlight(highlight)
+      sync()
+    },
+    setElasticity: (elasticity) => {
+      layer.setElasticity(elasticity)
+      sync()
+    },
+    setElasticityStrength: (elasticityStrength) => {
+      layer.setElasticityStrength(elasticityStrength)
       sync()
     },
     setFluidHue: (fluidHue) => {
@@ -131,26 +156,6 @@ export function apply(ctx: ClientContext): void {
       layer.setWallpaper(wallpaper)
       sync()
     },
-    setWhale: (whale) => {
-      layer.setWhale(whale)
-      sync()
-    },
-    setCritters: (critters) => {
-      layer.setCritters(critters)
-      sync()
-    },
-    setMesh: (mesh) => {
-      layer.setMesh(mesh)
-      sync()
-    },
-    setSpotlight: (spotlight) => {
-      layer.setSpotlight(spotlight)
-      sync()
-    },
-    setPress: (press) => {
-      layer.setPress(press)
-      sync()
-    },
     setWallpaperBlur: (wallpaperBlur) => {
       layer.setWallpaperBlur(wallpaperBlur)
       sync()
@@ -170,32 +175,12 @@ export function apply(ctx: ClientContext): void {
     authorizeVideo: () => {
       layer.authorizeVideo()
     },
-    setRefract: (refract) => {
-      layer.setRefract(refract)
-      sync()
-    },
-    setRefractOn: (refractOn) => {
-      layer.setRefractOn(refractOn)
-      sync()
-    },
-    setDispersion: (dispersion) => {
-      layer.setDispersion(dispersion)
-      sync()
-    },
-    setSpecular: (specular) => {
-      layer.setSpecular(specular)
-      sync()
-    },
     setScrim: (scrim) => {
       layer.setScrim(scrim)
       sync()
     },
     setScrimBlur: (scrimBlur) => {
       layer.setScrimBlur(scrimBlur)
-      sync()
-    },
-    setRim: (rim) => {
-      layer.setRim(rim)
       sync()
     },
   })

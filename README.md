@@ -19,15 +19,15 @@ Not affiliated with DeepSeek.
 
 This repository is a **fork** of [WYH66666666/DSH-Transparent-UI-Plugin](https://github.com/WYH66666666/DSH-Transparent-UI-Plugin) (MIT, © 2026 John Wu), adapted for **DSH 0.1.2-rc.1**.
 
-The edge refraction — rounded-rect SDF displacement maps fed into SVG `feDisplacementMap`, then stacked with `backdrop-filter` blur — follows the copy-paste liquid-glass shader in [shuding/liquid-glass](https://github.com/shuding/liquid-glass) (MIT, © Shu Ding).
+The panel glass — refraction, bevel, tint, rim light, and elasticity — is rendered by [nico-glass-kit](https://github.com/more-nico/nico-glass-kit) (`^0.3.0`, MIT). The fluid backdrop, wallpaper layers, and reading pads are this repository's own CSS/canvas work.
 
 ## Features
 
-- **Mica** floating glass cards, or **compat** mode (stock layout, frosted material)
+- **Mica** floating glass panels (32px corners, nico-glass-kit material), or **compat** mode (stock layout, frosted material)
 - Fluid backdrop with hue / depth knobs; optional image or video wallpaper
-- Liquid-glass refraction on header, sidebar, composer, docks, takeovers, jobs popover
+- Material knobs on the kit scale: blur, brightness, refraction, depth, curvature, dispersion, rim highlight
+- Hover **elasticity**: the glass and the panel content lean together under the pointer
 - Conversation reading pads (user bubbles and assistant prose only)
-- Cursor spotlight, hover tilt, and a 1px pointer rim (each toggleable)
 - No adaptive text color
 
 ## Requirements
@@ -80,4 +80,4 @@ Maintainers: `npm login`, then `git tag v0.1.0 && git push origin v0.1.0`. GitHu
 [MIT](LICENSE)
 
 - Fork of [DSH-Transparent-UI-Plugin](https://github.com/WYH66666666/DSH-Transparent-UI-Plugin) (MIT)
-- Liquid-glass refraction technique from [shuding/liquid-glass](https://github.com/shuding/liquid-glass) (MIT)
+- Glass material from [nico-glass-kit](https://github.com/more-nico/nico-glass-kit) (MIT)

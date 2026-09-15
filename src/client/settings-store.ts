@@ -9,12 +9,26 @@ import { defineStore, type EngineStoreHandle } from '@deepseek-ai/dsh-client-sto
 export interface AquaRowState {
   /** Persisted layer enable flag. */
   enabled: boolean
-  /** Rendering mode: mica or stock layout with generic glass. */
+  /** Rendering mode: mica (kit panes) or stock layout with generic glass. */
   mode: 'mica' | 'compat'
-  /** Glass blur radius, px. */
+  /** Kit optics blur radius, px. */
   blur: number
-  /** Glass frost amount, 0-100. */
-  frost: number
+  /** Kit optics brightness multiplier, 0-2. */
+  brightness: number
+  /** Kit optics refraction strength, 0-100. */
+  refraction: number
+  /** Kit optics refraction band width, px. */
+  depth: number
+  /** Kit optics bevel curvature, 0-1. */
+  curvature: number
+  /** Kit optics chromatic dispersion, 0-100. */
+  dispersion: number
+  /** Rim-light strength, 0-2. */
+  highlight: number
+  /** Mouse elasticity master. */
+  elasticity: boolean
+  /** Mouse elasticity strength, 0-0.5. */
+  elasticityStrength: number
   /** Fluid hue, degrees (0-360, continuous). */
   fluidHue: number
   /** Fluid depth, 0-100 (continuous). */
@@ -27,16 +41,6 @@ export interface AquaRowState {
   background: 'fluid' | 'wallpaper'
   /** Wallpaper image data URL. */
   wallpaper: string
-  /** Particle whale in the chat area center. */
-  whale: boolean
-  /** Ambient marine life (fish / bubbles / plankton). */
-  critters: boolean
-  /** Interactive mesh (the site's dot-grid with pointer repel). */
-  mesh: boolean
-  /** Cursor spotlight glow following the pointer over the glass panes. */
-  spotlight: boolean
-  /** Hover press-down for the glass panes. */
-  press: boolean
   /** Wallpaper blur radius, px. */
   wallpaperBlur: number
   /** Wallpaper frost veil, 0-100. */
@@ -45,20 +49,10 @@ export interface AquaRowState {
   videoBlur: number
   /** Video wallpaper brightness, 0-100. */
   videoBrightness: number
-  /** Liquid-glass edge refraction 0-100. */
-  refract: number
-  /** Refraction master switch. */
-  refractOn: boolean
-  /** Chromatic dispersion (spectral separation) 0-100. */
-  dispersion: number
-  /** Specular bevel sheen 0-100. */
-  specular: number
   /** Conversation pad opacity 0-100. */
   scrim: number
   /** Conversation pad blur, px. */
   scrimBlur: number
-  /** Pointer-centered 1px rim. */
-  rim: boolean
   /** Monotonic revision; -1 until first sync so revision 0 lands as a change. */
   revision: number
 }
@@ -68,29 +62,26 @@ export interface AquaSettingsPayload {
   enabled: boolean
   mode: 'mica' | 'compat'
   blur: number
-  frost: number
+  brightness: number
+  refraction: number
+  depth: number
+  curvature: number
+  dispersion: number
+  highlight: number
+  elasticity: boolean
+  elasticityStrength: number
   fluidHue: number
   fluidDepth: number
   bgBrightness: number
   dark: boolean
   background: 'fluid' | 'wallpaper'
   wallpaper: string
-  whale: boolean
-  critters: boolean
-  mesh: boolean
-  spotlight: boolean
-  press: boolean
   wallpaperBlur: number
   wallpaperFrost: number
   videoBlur: number
   videoBrightness: number
-  refract: number
-  refractOn: boolean
-  dispersion: number
-  specular: number
   scrim: number
   scrimBlur: number
-  rim: boolean
 }
 
 /** Declared action shape giving the exported factory a stable return type. */
@@ -108,29 +99,26 @@ export function createAquaRowStore(): EngineStoreHandle<AquaRowState, AquaRowAct
       enabled: true,
       mode: 'mica',
       blur: 3,
-      frost: 7,
+      brightness: 1.1,
+      refraction: 100,
+      depth: 8,
+      curvature: 0.2,
+      dispersion: 10,
+      highlight: 1,
+      elasticity: true,
+      elasticityStrength: 0.2,
       fluidHue: 320,
       fluidDepth: 25,
       bgBrightness: 50,
       dark: false,
       background: 'fluid',
       wallpaper: '',
-      whale: true,
-      critters: true,
-      mesh: true,
-      spotlight: true,
-      press: true,
       wallpaperBlur: 0,
       wallpaperFrost: 0,
       videoBlur: 6,
       videoBrightness: 45,
-      refract: 15,
-      refractOn: true,
-      dispersion: 25,
-      specular: 50,
       scrim: 25,
       scrimBlur: 5,
-      rim: true,
       revision: -1,
     }),
     actions: {
@@ -139,29 +127,26 @@ export function createAquaRowStore(): EngineStoreHandle<AquaRowState, AquaRowAct
         d.enabled = next.enabled
         d.mode = next.mode
         d.blur = next.blur
-        d.frost = next.frost
+        d.brightness = next.brightness
+        d.refraction = next.refraction
+        d.depth = next.depth
+        d.curvature = next.curvature
+        d.dispersion = next.dispersion
+        d.highlight = next.highlight
+        d.elasticity = next.elasticity
+        d.elasticityStrength = next.elasticityStrength
         d.fluidHue = next.fluidHue
         d.fluidDepth = next.fluidDepth
         d.bgBrightness = next.bgBrightness
         d.dark = next.dark
         d.background = next.background
         d.wallpaper = next.wallpaper
-        d.whale = next.whale
-        d.critters = next.critters
-        d.mesh = next.mesh
-        d.spotlight = next.spotlight
-        d.press = next.press
         d.wallpaperBlur = next.wallpaperBlur
         d.wallpaperFrost = next.wallpaperFrost
         d.videoBlur = next.videoBlur
         d.videoBrightness = next.videoBrightness
-        d.refract = next.refract
-        d.refractOn = next.refractOn
-        d.dispersion = next.dispersion
-        d.specular = next.specular
         d.scrim = next.scrim
         d.scrimBlur = next.scrimBlur
-        d.rim = next.rim
         d.revision = revision
       },
     },

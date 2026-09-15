@@ -28,4 +28,4 @@ tests/screenshots/
 # local editor / assistant state
 .commandcode/
 .kilo/
-
+AGENTS.md

@@ -1,7 +1,8 @@
 /**
- * Shared controls for the Aqua General-settings appearance row: the Knob
- * (stepless slider + number box), a two-option Segmented picker, and the
- * wallpaper file reader. Kept in one file so the row stays a single surface.
+ * Shared controls for the Nico settings page, built on nico-glass-kit: the
+ * Knob (glass slider + number field), a segmented picker, the switch, and the
+ * wallpaper/action capsule buttons. Kept in one file so the page stays a
+ * single surface.
  */
 import type { ReactNode } from 'react';
 /** One slider + number box, wired to a single value. */
@@ -34,7 +35,7 @@ export interface SegmentedProps<T extends string> {
     /** `cards` renders the large two-column choice cards. */
     variant?: 'compact' | 'cards';
 }
-/** Render a two-button segmented picker (compact pills or large cards). */
+/** Render a two-option segmented picker (compact pills or large cards). */
 export declare function Segmented<T extends string>({ label, value, options, onSelect, variant }: SegmentedProps<T>): import("react").JSX.Element;
 export interface ToggleProps {
     /** Accessible name for the setting represented by the switch. */
@@ -44,5 +45,13 @@ export interface ToggleProps {
 }
 /** Render the compact switch used by every boolean appearance setting. */
 export declare function Toggle({ label, pressed, onChange }: ToggleProps): import("react").JSX.Element;
+export interface PickButtonProps {
+    children: ReactNode;
+    onClick: () => void;
+    /** Destructive action (delete wallpaper). */
+    danger?: boolean;
+}
+/** Capsule action button (choose image / choose video / delete / enable). */
+export declare function PickButton({ children, onClick, danger }: PickButtonProps): import("react").JSX.Element;
 /** Read a file, downscale to ≤1920px, and return a compact JPEG data URL. */
 export declare function fileToDataUrl(file: File): Promise<string>;

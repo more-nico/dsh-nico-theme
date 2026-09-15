@@ -1,6 +1,7 @@
-/* Native DSH settings language for the Nico appearance row. The row is kept
+/* Native DSH settings language for the Nico settings page. The page is kept
  * flat: headings establish sections, while every value uses the same setting
- * lane and token-driven control treatment. */
+ * lane — the controls themselves are nico-glass-kit components, so this sheet
+ * only owns the lanes and the few size overrides the kit needs inside them. */
 
 .group {
   display: flex;
@@ -83,97 +84,10 @@
   line-height: 18px;
 }
 
-/* Slider: glass pill track + floating thumb. Uses --nico-progress for the
- * filled portion so the value is readable without an extra element. */
+/* Slider: the kit capsule must shrink into the value lane. */
 .slider {
   width: 100%;
   min-width: 0;
-  height: 28px;
-  margin: 0;
-  appearance: none;
-  cursor: pointer;
-  background: transparent;
-  --nico-thumb: 18px;
-}
-
-.slider::-webkit-slider-runnable-track {
-  height: 6px;
-  border-radius: 999px;
-  background: linear-gradient(
-    to right,
-    var(--dsw-alias-state-business-primary) 0 var(--nico-progress),
-    color-mix(in srgb, var(--dsw-alias-border-l2) 92%, transparent) var(--nico-progress) 100%
-  );
-  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.22);
-}
-
-.slider::-webkit-slider-thumb {
-  width: var(--nico-thumb);
-  height: var(--nico-thumb);
-  margin-top: -6px;
-  appearance: none;
-  border: 0;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow:
-    0 1px 4px rgba(0, 0, 0, 0.42),
-    0 0 0 1px rgba(0, 0, 0, 0.08),
-    0 0 0 3px color-mix(in srgb, var(--dsw-alias-state-business-primary) 18%, transparent);
-  transition:
-    transform 140ms ease,
-    box-shadow 140ms ease;
-}
-
-.slider:hover::-webkit-slider-thumb {
-  box-shadow:
-    0 2px 10px rgba(0, 0, 0, 0.5),
-    0 0 0 1px rgba(0, 0, 0, 0.08),
-    0 0 0 4px color-mix(in srgb, var(--dsw-alias-state-business-primary) 22%, transparent);
-}
-
-.slider:active::-webkit-slider-thumb {
-  transform: scale(1.12);
-}
-
-.slider::-moz-range-track {
-  height: 6px;
-  border: 0;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--dsw-alias-border-l2) 92%, transparent);
-  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.22);
-}
-
-.slider::-moz-range-progress {
-  height: 6px;
-  border-radius: 999px;
-  background: var(--dsw-alias-state-business-primary);
-}
-
-.slider::-moz-range-thumb {
-  width: var(--nico-thumb);
-  height: var(--nico-thumb);
-  border: 0;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow:
-    0 1px 4px rgba(0, 0, 0, 0.42),
-    0 0 0 1px rgba(0, 0, 0, 0.08),
-    0 0 0 3px color-mix(in srgb, var(--dsw-alias-state-business-primary) 18%, transparent);
-  transition:
-    transform 140ms ease,
-    box-shadow 140ms ease;
-}
-
-.slider::-moz-range-thumb:hover {
-  box-shadow:
-    0 2px 10px rgba(0, 0, 0, 0.5),
-    0 0 0 1px rgba(0, 0, 0, 0.08),
-    0 0 0 4px color-mix(in srgb, var(--dsw-alias-state-business-primary) 22%, transparent);
-}
-
-.slider:focus-visible {
-  outline: 2px solid var(--dsw-alias-brand-primary);
-  outline-offset: 4px;
 }
 
 .numberWrap {
@@ -184,41 +98,21 @@
   gap: 6px;
 }
 
+/* Number field: the kit input root is the label wrapper — pin it to the
+ * value lane width; the inner input fills it (kit default). */
 .number {
-  box-sizing: border-box;
-  width: 72px;
-  height: 32px;
-  padding: 0 9px;
-  border: 1px solid var(--dsw-alias-border-l2);
-  border-radius: 10px;
-  outline: none;
-  background: color-mix(in srgb, var(--dsw-alias-bg-layer-1) 94%, transparent);
-  color: var(--dsw-alias-label-primary);
-  font-size: 14px;
+  width: 84px;
+  min-width: 0;
+}
+
+.number :global(.ngs-input-field) {
   font-variant-numeric: tabular-nums;
-  line-height: 22px;
   text-align: right;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
-  transition:
-    border-color 140ms ease,
-    box-shadow 140ms ease,
-    background 140ms ease;
 }
 
-.number:focus {
-  border-color: var(--dsw-alias-state-business-primary);
-  background: var(--dsw-alias-bg-layer-1);
-  box-shadow:
-    0 0 0 3px color-mix(in srgb, var(--dsw-alias-state-business-primary) 18%, transparent),
-    inset 0 1px 0 rgba(255, 255, 255, 0.04);
-}
-
-.number:hover {
-  border-color: color-mix(in srgb, var(--dsw-alias-border-l2) 88%, var(--dsw-alias-label-tertiary) 12%);
-}
-
-.number::-webkit-outer-spin-button,
-.number::-webkit-inner-spin-button {
+/* The stepper arrows are the native spinner; keep them out of the way. */
+.number :global(.ngs-input-field)::-webkit-outer-spin-button,
+.number :global(.ngs-input-field)::-webkit-inner-spin-button {
   margin: 0;
   appearance: none;
 }
@@ -231,76 +125,37 @@
   line-height: 20px;
 }
 
-/* Compact choice control (kept for reuse). */
+/* Compact choice control: the kit segmented capsule just needs to shrink. */
 .segmented {
-  display: inline-flex;
-  align-items: center;
-  padding: 3px;
-  border: 1px solid var(--dsw-alias-border-l2);
-  border-radius: 10px;
-  background: var(--dsw-alias-bg-layer-1);
+  max-width: 100%;
+  min-width: 0;
 }
 
-.seg,
-.segActive {
-  min-width: 76px;
-  height: 28px;
-  padding: 0 12px;
-  border: 0;
-  border-radius: 7px;
-  background: transparent;
-  color: var(--dsw-alias-label-secondary);
-  font-size: 13px;
-  line-height: 20px;
-  cursor: pointer;
-}
-
-.seg:hover,
-.segActive:hover {
-  background: var(--dsw-alias-interactive-bg-hover);
-}
-
-.segActive {
-  background: var(--dsw-alias-state-business-tertiary);
-  color: var(--dsw-alias-state-business-primary);
-}
-
-/* Large two-column choice cards, matching the host 外观 cards: equal widths,
- * centered icon/thumbnail + label stack, hairline border, business selected
- * state. */
+/* Large two-column choice cards, in the playground device tab bar's language:
+ * the outer capsule holds pill slots (icon/thumbnail over label) inset by the
+ * same padding, so the slot radius follows the container radius concentrically,
+ * and the selected slot is the kit's own active pill — the same fill the tab
+ * bar uses. The kit's inner row is re-laid out as the two-column grid. */
 .segmentedCards {
+  display: block;
+  width: 100%;
+  min-width: 0;
+}
+
+.segmentedCards :global(.ngs-segmented-inner) {
   display: grid;
   width: 100%;
+  padding: 6px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  gap: 6px;
 }
 
-.card,
-.cardActive {
-  display: flex;
-  box-sizing: border-box;
-  min-height: 96px;
+.segmentedCards :global(.ngs-segment) {
+  min-width: 0;
+  min-height: 64px;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 14px 12px;
-  border: 1px solid var(--dsw-alias-border-l2);
-  border-radius: 12px;
-  background: transparent;
-  color: var(--dsw-alias-label-primary);
-  font-size: 14px;
-  line-height: 22px;
-  cursor: pointer;
-}
-
-.card:hover {
-  background: var(--dsw-alias-interactive-bg-hover);
-}
-
-.cardActive {
-  border-color: var(--dsw-alias-label-primary);
-  background: var(--dsw-alias-bg-layer-1);
+  gap: 6px;
+  border-radius: 999px;
 }
 
 .cardVisual {
@@ -342,64 +197,9 @@
   background: var(--dsw-alias-bg-layer-1);
 }
 
-.seg:focus-visible,
-.segActive:focus-visible,
-.card:focus-visible,
-.cardActive:focus-visible,
-.toggle:focus-visible,
-.toggleOn:focus-visible,
-.pickButton:focus-visible,
-.deleteButton:focus-visible {
-  outline: 2px solid var(--dsw-alias-brand-primary);
-  outline-offset: 2px;
-}
-
-/* Shared switch for every boolean appearance option. */
-.toggle,
-.toggleOn {
-  display: inline-flex;
-  box-sizing: border-box;
-  width: 44px;
-  height: 24px;
-  align-items: center;
-  padding: 2px;
-  border: 1px solid var(--dsw-alias-border-l2);
-  border-radius: 12px;
-  background: var(--dsw-alias-bg-layer-1);
-  cursor: pointer;
-}
-
-.toggle:hover {
-  background: var(--dsw-alias-interactive-bg-hover);
-}
-
-.toggleOn {
-  border-color: transparent;
-  background: var(--dsw-alias-state-business-primary);
-}
-
-.toggleOn:hover {
-  background: var(--dsw-alias-state-business-primary);
-}
-
-.toggleTrack {
-  display: block;
-  width: 38px;
-  height: 18px;
-}
-
-.toggleThumb {
-  display: block;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: var(--dsw-alias-label-tertiary);
-  transition: transform 140ms ease, background-color 140ms ease;
-}
-
-.toggleOn .toggleThumb {
-  transform: translateX(18px);
-  background: var(--dsw-alias-label-primary-foreground);
+/* Shared switch for every boolean appearance option (kit component). */
+.toggle {
+  flex: none;
 }
 
 .wallpaperPick {
@@ -415,25 +215,12 @@
   display: none;
 }
 
-.pickButton,
-.deleteButton {
-  height: 32px;
-  padding: 0 12px;
-  border: 1px solid var(--dsw-alias-border-l2);
-  border-radius: 8px;
-  background: var(--dsw-alias-bg-layer-1);
-  color: var(--dsw-alias-label-primary);
-  font-size: 13px;
-  line-height: 20px;
-  cursor: pointer;
-}
-
-.pickButton:hover,
-.deleteButton:hover {
-  background: var(--dsw-alias-interactive-bg-hover);
+.pickButton {
+  flex: none;
 }
 
 .deleteButton {
+  --ngs-text: var(--dsw-alias-label-error);
   color: var(--dsw-alias-label-error);
 }
 
@@ -496,20 +283,9 @@
     justify-content: flex-start;
   }
 
-  .segmented {
-    width: 100%;
-  }
-
-  .seg,
-  .segActive {
-    flex: 1;
-  }
-
-  .card,
-  .cardActive {
-    min-height: 84px;
-    gap: 6px;
-    padding: 10px;
+  .segmentedCards :global(.ngs-segment) {
+    min-height: 56px;
+    gap: 4px;
   }
 
   .cardVisual {

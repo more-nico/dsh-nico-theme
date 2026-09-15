@@ -2,9 +2,10 @@
  * Aqua theme layer: one toggleable visual skin over the whole Web surface.
  * Everything this layer owns is an effect — token overrides ride the theme
  * service's override stack, the CSS hooks ride a `data-dsh-aqua` attribute on
- * <html> (the stylesheet only applies under it), the ambient scene and page
- * fades are mounted/removed with the layer — so switching the flag off (or
- * unloading the plugin) restores the stock UI exactly: no residue, no reload.
+ * <html> (the stylesheet only applies under it), the ambient scene, page
+ * fades, and the glass panes are mounted/removed with the layer — so switching
+ * the flag off (or unloading the plugin) restores the stock UI exactly: no
+ * residue, no reload.
  *
  * The enable flag persists in localStorage: a client-only visual preference
  * (like the selected-session key), written and read by this plugin alone.
@@ -25,12 +26,26 @@ export declare const DEFAULT_ENABLED = true;
 export declare const AQUA_TOKEN_OVERRIDES: ThemeTokenOverrides;
 /** Tunable layer knobs, persisted independently of the enable flag. */
 export interface AquaSettings {
-    /** Rendering mode: mica (frosted floating cards) or the stock layout with a generic glass material. */
+    /** Rendering mode: mica (kit glass panes) or the stock layout with a generic glass material. */
     mode: 'mica' | 'compat';
-    /** Glass backdrop blur radius, px. */
+    /** Glass backdrop blur radius, px (kit optics blur). */
     blur: number;
-    /** Glass fill opacity, 0-100 (50 = the shipped look; drives the frost multiplier). */
-    frost: number;
+    /** Glass brightness multiplier, 0-2 (kit optics brightness). */
+    brightness: number;
+    /** Refraction strength, 0-100 (kit optics refraction, passed as a 0-1 ratio). */
+    refraction: number;
+    /** Refraction band width, px (kit optics depth). */
+    depth: number;
+    /** Bevel profile, 0-1 (kit optics curvature). */
+    curvature: number;
+    /** Chromatic dispersion, 0-100 (kit optics dispersion, passed as a 0-1 ratio). */
+    dispersion: number;
+    /** Rim-light strength, 0-2 (kit highlight intensity). */
+    highlight: number;
+    /** Mouse elasticity master (kit elasticity; off = rigid panes). */
+    elasticity: boolean;
+    /** Mouse elasticity strength, 0-0.5 (kit elasticity value). */
+    elasticityStrength: number;
     /** Fluid hue, degrees (0-360, continuous). */
     fluidHue: number;
     /** Fluid depth, 0-100 (0 = deep saturated, 100 = pale light, continuous). */
@@ -41,16 +56,6 @@ export interface AquaSettings {
     background: 'fluid' | 'wallpaper';
     /** Wallpaper image data URL (empty until one is picked). */
     wallpaper: string;
-    /** Particle whale in the chat area center (the harness hero fish). */
-    whale: boolean;
-    /** Ambient marine life (fish / bubbles / plankton). */
-    critters: boolean;
-    /** Interactive mesh (the site's dot-grid with pointer repel). */
-    mesh: boolean;
-    /** Cursor spotlight glow that follows the pointer over the glass panes. */
-    spotlight: boolean;
-    /** Hover press-down: the pane under the cursor sinks a touch (tactile depth). */
-    press: boolean;
     /** Wallpaper blur radius, px. */
     wallpaperBlur: number;
     /** Wallpaper frost veil, 0-100. */
@@ -59,20 +64,10 @@ export interface AquaSettings {
     videoBlur: number;
     /** Video wallpaper brightness, 0-100 (100 = fully lit, 0 = deepest dim). */
     videoBrightness: number;
-    /** Liquid-glass edge refraction 0-100. */
-    refract: number;
-    /** Master for edge refraction (value is kept when off). */
-    refractOn: boolean;
-    /** Chromatic dispersion 0-100. */
-    dispersion: number;
-    /** Specular bevel sheen 0-100. */
-    specular: number;
     /** Conversation reading-pad opacity 0-100. */
     scrim: number;
     /** Conversation reading-pad blur, px. */
     scrimBlur: number;
-    /** Pointer-centered 1px rim on mica panes. */
-    rim: boolean;
 }
 /**
  * Owns the Aqua layer lifecycle: reads the durable enable flag, and applies /
@@ -90,12 +85,8 @@ export declare class AquaLayer {
     private interactionDisposer;
     private themeListener;
     private seamDisposer;
-    private spotlightDisposer;
-    private refractDisposer;
+    private paneDisposer;
     private padDisposer;
-    private rimDisposer;
-    private whaleHandle;
-    private meshHandle;
     /** Object URL of the current large-video wallpaper (revoked on replace). */
     private videoObjectUrl;
     /** IndexedDB id backing the current object URL (guards against reloads). */
@@ -119,10 +110,24 @@ export declare class AquaLayer {
     setEnabled(value: boolean): void;
     /** Set the rendering mode ('mica' or 'compat'). */
     setMode(value: 'mica' | 'compat'): void;
-    /** Set the glass blur radius (px). */
+    /** Set the kit optics blur radius (px). */
     setBlur(value: number): void;
-    /** Set the glass frost amount (0-100). */
-    setFrost(value: number): void;
+    /** Set the kit optics brightness multiplier. */
+    setBrightness(value: number): void;
+    /** Set the kit optics refraction strength (0-100). */
+    setRefraction(value: number): void;
+    /** Set the kit optics refraction band width (px). */
+    setDepth(value: number): void;
+    /** Set the kit optics bevel curvature (0-1). */
+    setCurvature(value: number): void;
+    /** Set the kit optics chromatic dispersion (0-100). */
+    setDispersion(value: number): void;
+    /** Set the rim-light highlight strength (0-2). */
+    setHighlight(value: number): void;
+    /** Set the mouse-elasticity master flag. */
+    setElasticity(value: boolean): void;
+    /** Set the mouse-elasticity strength (0-0.5). */
+    setElasticityStrength(value: number): void;
     /** Set the fluid hue (degrees, continuous). */
     setFluidHue(value: number): void;
     /** Set the fluid depth (0-100, continuous: deep ↔ pale). */
@@ -134,16 +139,6 @@ export declare class AquaLayer {
     /** Set the wallpaper image (a data URL; empty clears it) or a large video
      *  (`idb:<id>` marker whose blob lives in IndexedDB). */
     setWallpaper(value: string): void;
-    /** Set the particle-whale flag (chat-area center decoration). */
-    setWhale(value: boolean): void;
-    /** Set the ambient marine-life flag (fish / bubbles / plankton). */
-    setCritters(value: boolean): void;
-    /** Set the interactive-mesh flag (dot-grid decoration). */
-    setMesh(value: boolean): void;
-    /** Set the cursor-spotlight flag (pointer-tracking glass glow). */
-    setSpotlight(value: boolean): void;
-    /** Set the hover-press flag (pane sinks a touch under the cursor). */
-    setPress(value: boolean): void;
     /** Set the wallpaper blur radius (px). */
     setWallpaperBlur(value: number): void;
     /** Set the wallpaper frost veil (0-100). */
@@ -152,17 +147,16 @@ export declare class AquaLayer {
     setVideoBlur(value: number): void;
     /** Set the video wallpaper brightness (0-100, 100 = fully lit). */
     setVideoBrightness(value: number): void;
-    setRefract(value: number): void;
-    setRefractOn(value: boolean): void;
-    setDispersion(value: number): void;
-    setSpecular(value: number): void;
+    /** Set the conversation pad opacity (0-100). */
     setScrim(value: number): void;
+    /** Set the conversation pad blur (px). */
     setScrimBlur(value: number): void;
-    setRim(value: boolean): void;
     /** After the user re-grants file access (选择视频 click on an fsa: video),
      *  drop the mount guard and re-apply so the file is re-read and played. */
     authorizeVideo(): void;
     private sync;
+    /** The kit pane parameters for the current knobs (playground scale). */
+    private glassPaneParams;
     /** Write the knob-driven CSS variables and mode attributes onto <html>. */
     private applySettings;
     /** The wallpaper plays as a plain <video> element (the browser's own
@@ -174,10 +168,6 @@ export declare class AquaLayer {
     /** Apply the mode's token layer (floating palette, or translucent compat). */
     private applyTokens;
     private mount;
-    /** Mount or drop the particle whale to match enabled + the whale flag. */
-    private syncWhale;
-    /** Mount or drop the interactive mesh to match enabled + the mesh flag. */
-    private syncMesh;
     private unmount;
     /** Attach the fluid shader and the interaction feeds. */
     private mountFluid;
@@ -186,6 +176,4 @@ export declare class AquaLayer {
     private applyFluidPalettes;
     /** Stamp the data-* seams the stylesheet keys off (self-contained mode). */
     private startSeamStamper;
-    /** Attach the cursor-spotlight pointer feeds (idempotent per mount). */
-    private startSpotlightFeed;
 }

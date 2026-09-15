@@ -2,9 +2,10 @@
  * Aqua theme layer: one toggleable visual skin over the whole Web surface.
  * Everything this layer owns is an effect — token overrides ride the theme
  * service's override stack, the CSS hooks ride a `data-dsh-aqua` attribute on
- * <html> (the stylesheet only applies under it), the ambient scene and page
- * fades are mounted/removed with the layer — so switching the flag off (or
- * unloading the plugin) restores the stock UI exactly: no residue, no reload.
+ * <html> (the stylesheet only applies under it), the ambient scene, page
+ * fades, and the glass panes are mounted/removed with the layer — so switching
+ * the flag off (or unloading the plugin) restores the stock UI exactly: no
+ * residue, no reload.
  *
  * The enable flag persists in localStorage: a client-only visual preference
  * (like the selected-session key), written and read by this plugin alone.
@@ -13,18 +14,14 @@ import type { Context } from '@deepseek-ai/cordis'
 import type { ThemeTokenOverrides } from '@deepseek-ai/dsh-client-ui-theme/client'
 // Type-only: pulls the locale plugin's Context merge (ctx.locale).
 import type {} from '@deepseek-ai/dsh-client-locale/client'
-import { ensureAmbientScene, removeAmbientScene, ensurePageFades, removePageFades } from './critters.ts'
+import { ensureAmbientScene, removeAmbientScene, ensurePageFades, removePageFades } from './ambient.ts'
 import { attachFluidShader, SITE_FLUID_PARAMS, type FluidParams, type FluidShaderHandle } from './fluid-shader.ts'
 import { fluidToneColors } from './fluid-tones.ts'
 import { deleteVideoBlob, loadVideoBlob, loadVideoHandle } from './wallpaper-store.ts'
 import { attachFluidInteractions } from './fluid-interactions.ts'
 import { startSeamStamper } from './seam-stamper.ts'
-import { mountWhale, type WhaleHandle } from './whale.ts'
-import { mountMesh, type MeshHandle } from './mesh.ts'
-import { startSpotlight, SPOTLIGHT_ATTRIBUTE, PRESS_ATTRIBUTE } from './spotlight.ts'
-import { startRefraction, syncRefraction } from './refract.ts'
+import { startGlassPanes, syncGlassPanes, type GlassPaneParams } from './glass-panes.tsx'
 import { startReadingPads } from './reading-pad.ts'
-import { startRim } from './rim.ts'
 
 /** html attribute selecting the Aqua layer: CSS hooks and ambient effects. */
 export const AQUA_ATTRIBUTE = 'data-dsh-aqua'
@@ -219,12 +216,26 @@ function writeEnabled(value: boolean): void {
 
 /** Tunable layer knobs, persisted independently of the enable flag. */
 export interface AquaSettings {
-  /** Rendering mode: mica (frosted floating cards) or the stock layout with a generic glass material. */
+  /** Rendering mode: mica (kit glass panes) or the stock layout with a generic glass material. */
   mode: 'mica' | 'compat'
-  /** Glass backdrop blur radius, px. */
+  /** Glass backdrop blur radius, px (kit optics blur). */
   blur: number
-  /** Glass fill opacity, 0-100 (50 = the shipped look; drives the frost multiplier). */
-  frost: number
+  /** Glass brightness multiplier, 0-2 (kit optics brightness). */
+  brightness: number
+  /** Refraction strength, 0-100 (kit optics refraction, passed as a 0-1 ratio). */
+  refraction: number
+  /** Refraction band width, px (kit optics depth). */
+  depth: number
+  /** Bevel profile, 0-1 (kit optics curvature). */
+  curvature: number
+  /** Chromatic dispersion, 0-100 (kit optics dispersion, passed as a 0-1 ratio). */
+  dispersion: number
+  /** Rim-light strength, 0-2 (kit highlight intensity). */
+  highlight: number
+  /** Mouse elasticity master (kit elasticity; off = rigid panes). */
+  elasticity: boolean
+  /** Mouse elasticity strength, 0-0.5 (kit elasticity value). */
+  elasticityStrength: number
   /** Fluid hue, degrees (0-360, continuous). */
   fluidHue: number
   /** Fluid depth, 0-100 (0 = deep saturated, 100 = pale light, continuous). */
@@ -235,16 +246,6 @@ export interface AquaSettings {
   background: 'fluid' | 'wallpaper'
   /** Wallpaper image data URL (empty until one is picked). */
   wallpaper: string
-  /** Particle whale in the chat area center (the harness hero fish). */
-  whale: boolean
-  /** Ambient marine life (fish / bubbles / plankton). */
-  critters: boolean
-  /** Interactive mesh (the site's dot-grid with pointer repel). */
-  mesh: boolean
-  /** Cursor spotlight glow that follows the pointer over the glass panes. */
-  spotlight: boolean
-  /** Hover press-down: the pane under the cursor sinks a touch (tactile depth). */
-  press: boolean
   /** Wallpaper blur radius, px. */
   wallpaperBlur: number
   /** Wallpaper frost veil, 0-100. */
@@ -253,54 +254,47 @@ export interface AquaSettings {
   videoBlur: number
   /** Video wallpaper brightness, 0-100 (100 = fully lit, 0 = deepest dim). */
   videoBrightness: number
-  /** Liquid-glass edge refraction 0-100. */
-  refract: number
-  /** Master for edge refraction (value is kept when off). */
-  refractOn: boolean
-  /** Chromatic dispersion 0-100. */
-  dispersion: number
-  /** Specular bevel sheen 0-100. */
-  specular: number
   /** Conversation reading-pad opacity 0-100. */
   scrim: number
   /** Conversation reading-pad blur, px. */
   scrimBlur: number
-  /** Pointer-centered 1px rim on mica panes. */
-  rim: boolean
 }
 
-/** Shipped defaults — what a first-time install sees (the tuned look). */
+/** Shipped defaults — nico-glass-kit playground values plus the tuned backdrop. */
 const SETTINGS_DEFAULTS: AquaSettings = {
   mode: 'mica',
   blur: 3,
-  frost: 7,
+  brightness: 1.1,
+  refraction: 100,
+  depth: 8,
+  curvature: 0.2,
+  dispersion: 10,
+  highlight: 1,
+  elasticity: true,
+  elasticityStrength: 0.2,
+  fluidHue: 320,
+  fluidDepth: 25,
   bgBrightness: 50,
   background: 'fluid',
   wallpaper: '',
-  whale: true,
-  critters: true,
-  mesh: true,
-  spotlight: true,
-  press: true,
-  fluidHue: 320,
-  fluidDepth: 25,
   wallpaperBlur: 0,
   wallpaperFrost: 0,
   videoBlur: 6,
   videoBrightness: 45,
-  refract: 15,
-  refractOn: true,
-  dispersion: 25,
-  specular: 50,
   scrim: 25,
   scrimBlur: 5,
-  rim: true,
 }
 
 /** Numeric knob keys and their localStorage names. */
 const NUMERIC_KEYS = {
-  blur: 'dsh.ui-aqua.blur',
-  frost: 'dsh.ui-aqua.frost',
+  blur: 'dsh.ui-nico.blur',
+  brightness: 'dsh.ui-nico.brightness',
+  refraction: 'dsh.ui-nico.refraction',
+  depth: 'dsh.ui-nico.depth',
+  curvature: 'dsh.ui-nico.curvature',
+  dispersion: 'dsh.ui-nico.dispersion',
+  highlight: 'dsh.ui-nico.highlight',
+  elasticityStrength: 'dsh.ui-nico.elasticityStrength',
   fluidHue: 'dsh.ui-aqua.fluidHue',
   fluidDepth: 'dsh.ui-aqua.fluidDepth',
   bgBrightness: 'dsh.ui-aqua.bgBrightness',
@@ -308,32 +302,61 @@ const NUMERIC_KEYS = {
   wallpaperFrost: 'dsh.ui-aqua.wallpaperFrost',
   videoBlur: 'dsh.ui-aqua.videoBlur',
   videoBrightness: 'dsh.ui-aqua.videoBrightness',
-  refract: 'dsh.ui-aqua.refract',
-  dispersion: 'dsh.ui-aqua.dispersion',
-  specular: 'dsh.ui-aqua.specular',
   scrim: 'dsh.ui-aqua.scrim',
   scrimBlur: 'dsh.ui-aqua.scrimBlur',
 } as const
 type NumericKey = keyof typeof NUMERIC_KEYS
 
+/** Inclusive range for every numeric knob. */
+const NUMERIC_RANGE: Record<NumericKey, readonly [number, number]> = {
+  blur: [0, 64],
+  brightness: [0, 2],
+  refraction: [0, 100],
+  depth: [0, 40],
+  curvature: [0, 1],
+  dispersion: [0, 100],
+  highlight: [0, 2],
+  elasticityStrength: [0, 0.5],
+  fluidHue: [0, 360],
+  fluidDepth: [0, 100],
+  bgBrightness: [0, 100],
+  wallpaperBlur: [0, 40],
+  wallpaperFrost: [0, 100],
+  videoBlur: [0, 40],
+  videoBrightness: [0, 100],
+  scrim: [0, 100],
+  scrimBlur: [0, 40],
+}
+
 const MODE_KEY = 'dsh.ui-aqua.mode'
 const BACKGROUND_KEY = 'dsh.ui-aqua.background'
 const WALLPAPER_KEY = 'dsh.ui-aqua.wallpaper'
-const WHALE_KEY = 'dsh.ui-aqua.whale'
-const CRITTERS_KEY = 'dsh.ui-aqua.critters'
-const MESH_KEY = 'dsh.ui-aqua.mesh'
-const SPOTLIGHT_KEY = 'dsh.ui-aqua.spotlight'
-const PRESS_KEY = 'dsh.ui-aqua.press'
-const REFRACT_ON_KEY = 'dsh.ui-aqua.refractOn'
-const RIM_KEY = 'dsh.ui-aqua.rim'
+const ELASTICITY_KEY = 'dsh.ui-nico.elasticity'
+
+/** Retired keys from earlier iterations — dropped once on load. */
+const RETIRED_KEYS = [
+  'dsh.ui-aqua.blur',
+  'dsh.ui-aqua.frost',
+  'dsh.ui-aqua.specular',
+  'dsh.ui-aqua.refract',
+  'dsh.ui-aqua.refractOn',
+  'dsh.ui-aqua.dispersion',
+  'dsh.ui-aqua.spotlight',
+  'dsh.ui-aqua.press',
+  'dsh.ui-aqua.rim',
+  'dsh.ui-aqua.whale',
+  'dsh.ui-aqua.critters',
+  'dsh.ui-aqua.mesh',
+  'dsh.ui-aqua.entrance',
+  'dsh.ui-aqua.tilt',
+  'dsh.ui-aqua.lens',
+  'dsh.ui-aqua.fluidTone',
+] as const
 
 /** Clamp a numeric knob into its sane range. */
 function clampSetting(key: NumericKey, value: number): number {
-  const max = key === 'blur' || key === 'wallpaperBlur' || key === 'videoBlur' || key === 'scrimBlur' ? 40
-    : key === 'frost' || key === 'wallpaperFrost' || key === 'bgBrightness' || key === 'videoBrightness'
-      || key === 'refract' || key === 'scrim' ? 100
-      : 360
-  return Number.isFinite(value) ? Math.min(max, Math.max(0, value)) : SETTINGS_DEFAULTS[key]
+  const [min, max] = NUMERIC_RANGE[key]
+  return Number.isFinite(value) ? Math.min(max, Math.max(min, value)) : SETTINGS_DEFAULTS[key]
 }
 
 /** Read one numeric knob from localStorage (absent/parse failure means the default). */
@@ -373,8 +396,7 @@ function writeBackground(value: 'fluid' | 'wallpaper'): void {
   }
 }
 
-/** Read the rendering mode ('mica' or 'compat'; legacy 'float'/'liquid'
- *  values migrate to 'mica'). */
+/** Read the rendering mode ('mica' or 'compat'). */
 function readMode(): 'mica' | 'compat' {
   try {
     const stored = localStorage.getItem(MODE_KEY)
@@ -412,104 +434,6 @@ function writeWallpaper(value: string): void {
   }
 }
 
-/** Read the particle-whale flag (absent means on). */
-function readWhale(): boolean {
-  try {
-    const raw = localStorage.getItem(WHALE_KEY)
-    return raw === null ? true : raw === 'true'
-  } catch {
-    return true
-  }
-}
-
-/** Persist the particle-whale flag. */
-function writeWhale(value: boolean): void {
-  try {
-    localStorage.setItem(WHALE_KEY, String(value))
-  } catch {
-    /* in-memory state still applies for this tab */
-  }
-}
-
-/** Read the critters flag (absent means on). */
-function readCritters(): boolean {
-  try {
-    const raw = localStorage.getItem(CRITTERS_KEY)
-    return raw === null ? true : raw === 'true'
-  } catch {
-    return true
-  }
-}
-
-/** Persist the critters flag. */
-function writeCritters(value: boolean): void {
-  try {
-    localStorage.setItem(CRITTERS_KEY, String(value))
-  } catch {
-    /* in-memory state still applies for this tab */
-  }
-}
-
-/** Read the interactive-mesh flag (absent means on). */
-function readMesh(): boolean {
-  try {
-    const raw = localStorage.getItem(MESH_KEY)
-    return raw === null ? true : raw === 'true'
-  } catch {
-    return true
-  }
-}
-
-/** Persist the interactive-mesh flag. */
-function writeMesh(value: boolean): void {
-  try {
-    localStorage.setItem(MESH_KEY, String(value))
-  } catch {
-    /* in-memory state still applies for this tab */
-  }
-}
-
-/** Read the cursor-spotlight flag (absent means on). */
-function readSpotlight(): boolean {
-  try {
-    const raw = localStorage.getItem(SPOTLIGHT_KEY)
-    return raw === null ? true : raw === 'true'
-  } catch {
-    return true
-  }
-}
-
-/** Persist the cursor-spotlight flag. */
-function writeSpotlight(value: boolean): void {
-  try {
-    localStorage.setItem(SPOTLIGHT_KEY, String(value))
-  } catch {
-    /* in-memory state still applies for this tab */
-  }
-}
-
-/** Read the hover-press flag (absent means on). */
-function readPress(): boolean {
-  try {
-    // One-shot migration: the entrance-rise key from the earlier iteration
-    // never shipped — drop it so no stale preference lingers.
-    localStorage.removeItem('dsh.ui-aqua.entrance')
-    const raw = localStorage.getItem(PRESS_KEY)
-    return raw === null ? true : raw === 'true'
-  } catch {
-    return true
-  }
-}
-
-/** Persist the hover-press flag. */
-function writePress(value: boolean): void {
-  try {
-    localStorage.setItem(PRESS_KEY, String(value))
-  } catch {
-    /* in-memory state still applies for this tab */
-  }
-}
-
 function readFlag(key: string, fallback: boolean): boolean {
   try {
     const raw = localStorage.getItem(key)
@@ -524,6 +448,15 @@ function writeFlag(key: string, value: boolean): void {
     localStorage.setItem(key, String(value))
   } catch {
     /* in-memory state still applies */
+  }
+}
+
+/** Whether the user asked the OS to reduce motion (kit has no opinion of its own). */
+function prefersReducedMotion(): boolean {
+  try {
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  } catch {
+    return false
   }
 }
 
@@ -548,12 +481,8 @@ export class AquaLayer {
   private interactionDisposer: (() => void) | undefined
   private themeListener: (() => void) | undefined
   private seamDisposer: (() => void) | undefined
-  private spotlightDisposer: (() => void) | undefined
-  private refractDisposer: (() => void) | undefined
+  private paneDisposer: (() => void) | undefined
   private padDisposer: (() => void) | undefined
-  private rimDisposer: (() => void) | undefined
-  private whaleHandle: WhaleHandle | undefined
-  private meshHandle: MeshHandle | undefined
   /** Object URL of the current large-video wallpaper (revoked on replace). */
   private videoObjectUrl: string | undefined
   /** IndexedDB id backing the current object URL (guards against reloads). */
@@ -572,9 +501,10 @@ export class AquaLayer {
           this.sync()
         }
         const key = event.key
-        if (key !== null && (key in NUMERIC_KEYS || key === BACKGROUND_KEY || key === WALLPAPER_KEY || key === MODE_KEY || key === WHALE_KEY || key === CRITTERS_KEY || key === MESH_KEY || key === SPOTLIGHT_KEY || key === PRESS_KEY || key === REFRACT_ON_KEY || key === RIM_KEY)) {
+        if (key !== null && (key in NUMERIC_KEYS || key === BACKGROUND_KEY || key === WALLPAPER_KEY
+          || key === MODE_KEY || key === ELASTICITY_KEY)) {
           this.reloadSettings()
-          if (this.enabled) { this.applySettings(); this.applyTokens(); this.applyFluidPalettes(); this.syncWhale() }
+          if (this.enabled) { this.applySettings(); this.applyTokens(); this.applyFluidPalettes() }
         }
       }
       window.addEventListener('storage', onStorage)
@@ -583,7 +513,6 @@ export class AquaLayer {
       // the OS). Runs even while disabled so the settings row stays correct.
       this.themeListener = this.ctx.on('theme/change', () => {
         this.dark = this.resolveScheme()
-        this.whaleHandle?.setDark(this.dark)
         if (this.enabled) {
           this.applySettings()
           this.applyFluidPalettes()
@@ -630,37 +559,32 @@ export class AquaLayer {
   private reloadSettings(): void {
     try {
       // One-shot cleanup: knobs from reverted iterations never shipped.
-      localStorage.removeItem('dsh.ui-aqua.tilt')
-      localStorage.removeItem('dsh.ui-aqua.lens')
-      localStorage.removeItem('dsh.ui-aqua.fluidTone')
+      for (const key of RETIRED_KEYS) localStorage.removeItem(key)
     } catch {
       /* ignore */
     }
     this.settings = {
       mode: readMode(),
       blur: readSetting('blur'),
-      frost: readSetting('frost'),
+      brightness: readSetting('brightness'),
+      refraction: readSetting('refraction'),
+      depth: readSetting('depth'),
+      curvature: readSetting('curvature'),
+      dispersion: readSetting('dispersion'),
+      highlight: readSetting('highlight'),
+      elasticity: readFlag(ELASTICITY_KEY, true),
+      elasticityStrength: readSetting('elasticityStrength'),
       fluidHue: readSetting('fluidHue'),
       fluidDepth: readSetting('fluidDepth'),
       bgBrightness: readSetting('bgBrightness'),
       background: readBackground(),
       wallpaper: readWallpaper(),
-      whale: readWhale(),
-      critters: readCritters(),
-      mesh: readMesh(),
-      spotlight: readSpotlight(),
-      press: readPress(),
       wallpaperBlur: readSetting('wallpaperBlur'),
       wallpaperFrost: readSetting('wallpaperFrost'),
       videoBlur: readSetting('videoBlur'),
       videoBrightness: readSetting('videoBrightness'),
-      refract: readSetting('refract'),
-      refractOn: readFlag(REFRACT_ON_KEY, true),
-      dispersion: readSetting('dispersion'),
-      specular: readSetting('specular'),
       scrim: readSetting('scrim'),
       scrimBlur: readSetting('scrimBlur'),
-      rim: readFlag(RIM_KEY, true),
     }
   }
 
@@ -680,7 +604,7 @@ export class AquaLayer {
     if (this.enabled) { this.applySettings(); this.applyTokens() }
   }
 
-  /** Set the glass blur radius (px). */
+  /** Set the kit optics blur radius (px). */
   setBlur(value: number): void {
     const next = clampSetting('blur', value)
     if (next === this.settings.blur) return
@@ -689,12 +613,74 @@ export class AquaLayer {
     if (this.enabled) this.applySettings()
   }
 
-  /** Set the glass frost amount (0-100). */
-  setFrost(value: number): void {
-    const next = clampSetting('frost', value)
-    if (next === this.settings.frost) return
-    this.settings.frost = next
-    writeSetting('frost', next)
+  /** Set the kit optics brightness multiplier. */
+  setBrightness(value: number): void {
+    const next = clampSetting('brightness', value)
+    if (next === this.settings.brightness) return
+    this.settings.brightness = next
+    writeSetting('brightness', next)
+    if (this.enabled) this.applySettings()
+  }
+
+  /** Set the kit optics refraction strength (0-100). */
+  setRefraction(value: number): void {
+    const next = clampSetting('refraction', value)
+    if (next === this.settings.refraction) return
+    this.settings.refraction = next
+    writeSetting('refraction', next)
+    if (this.enabled) this.applySettings()
+  }
+
+  /** Set the kit optics refraction band width (px). */
+  setDepth(value: number): void {
+    const next = clampSetting('depth', value)
+    if (next === this.settings.depth) return
+    this.settings.depth = next
+    writeSetting('depth', next)
+    if (this.enabled) this.applySettings()
+  }
+
+  /** Set the kit optics bevel curvature (0-1). */
+  setCurvature(value: number): void {
+    const next = clampSetting('curvature', value)
+    if (next === this.settings.curvature) return
+    this.settings.curvature = next
+    writeSetting('curvature', next)
+    if (this.enabled) this.applySettings()
+  }
+
+  /** Set the kit optics chromatic dispersion (0-100). */
+  setDispersion(value: number): void {
+    const next = clampSetting('dispersion', value)
+    if (next === this.settings.dispersion) return
+    this.settings.dispersion = next
+    writeSetting('dispersion', next)
+    if (this.enabled) this.applySettings()
+  }
+
+  /** Set the rim-light highlight strength (0-2). */
+  setHighlight(value: number): void {
+    const next = clampSetting('highlight', value)
+    if (next === this.settings.highlight) return
+    this.settings.highlight = next
+    writeSetting('highlight', next)
+    if (this.enabled) this.applySettings()
+  }
+
+  /** Set the mouse-elasticity master flag. */
+  setElasticity(value: boolean): void {
+    if (value === this.settings.elasticity) return
+    this.settings.elasticity = value
+    writeFlag(ELASTICITY_KEY, value)
+    if (this.enabled) this.applySettings()
+  }
+
+  /** Set the mouse-elasticity strength (0-0.5). */
+  setElasticityStrength(value: number): void {
+    const next = clampSetting('elasticityStrength', value)
+    if (next === this.settings.elasticityStrength) return
+    this.settings.elasticityStrength = next
+    writeSetting('elasticityStrength', next)
     if (this.enabled) this.applySettings()
   }
 
@@ -753,46 +739,6 @@ export class AquaLayer {
     if (this.enabled) this.applySettings()
   }
 
-  /** Set the particle-whale flag (chat-area center decoration). */
-  setWhale(value: boolean): void {
-    if (value === this.settings.whale) return
-    this.settings.whale = value
-    writeWhale(value)
-    if (this.enabled) this.syncWhale()
-  }
-
-  /** Set the ambient marine-life flag (fish / bubbles / plankton). */
-  setCritters(value: boolean): void {
-    if (value === this.settings.critters) return
-    this.settings.critters = value
-    writeCritters(value)
-    if (this.enabled) this.applySettings()
-  }
-
-  /** Set the interactive-mesh flag (dot-grid decoration). */
-  setMesh(value: boolean): void {
-    if (value === this.settings.mesh) return
-    this.settings.mesh = value
-    writeMesh(value)
-    if (this.enabled) this.syncMesh()
-  }
-
-  /** Set the cursor-spotlight flag (pointer-tracking glass glow). */
-  setSpotlight(value: boolean): void {
-    if (value === this.settings.spotlight) return
-    this.settings.spotlight = value
-    writeSpotlight(value)
-    if (this.enabled) this.applySettings()
-  }
-
-  /** Set the hover-press flag (pane sinks a touch under the cursor). */
-  setPress(value: boolean): void {
-    if (value === this.settings.press) return
-    this.settings.press = value
-    writePress(value)
-    if (this.enabled) this.applySettings()
-  }
-
   /** Set the wallpaper blur radius (px). */
   setWallpaperBlur(value: number): void {
     const next = clampSetting('wallpaperBlur', value)
@@ -829,37 +775,7 @@ export class AquaLayer {
     if (this.enabled) this.applySettings()
   }
 
-  setRefract(value: number): void {
-    const next = clampSetting('refract', value)
-    if (next === this.settings.refract) return
-    this.settings.refract = next
-    writeSetting('refract', next)
-    if (this.enabled) this.applySettings()
-  }
-
-  setRefractOn(value: boolean): void {
-    if (value === this.settings.refractOn) return
-    this.settings.refractOn = value
-    writeFlag(REFRACT_ON_KEY, value)
-    if (this.enabled) this.applySettings()
-  }
-
-  setDispersion(value: number): void {
-    const next = clampSetting('dispersion', value)
-    if (next === this.settings.dispersion) return
-    this.settings.dispersion = next
-    writeSetting('dispersion', next)
-    if (this.enabled) this.applySettings()
-  }
-
-  setSpecular(value: number): void {
-    const next = clampSetting('specular', value)
-    if (next === this.settings.specular) return
-    this.settings.specular = next
-    writeSetting('specular', next)
-    if (this.enabled) this.applySettings()
-  }
-
+  /** Set the conversation pad opacity (0-100). */
   setScrim(value: number): void {
     const next = clampSetting('scrim', value)
     if (next === this.settings.scrim) return
@@ -868,18 +784,12 @@ export class AquaLayer {
     if (this.enabled) this.applySettings()
   }
 
+  /** Set the conversation pad blur (px). */
   setScrimBlur(value: number): void {
     const next = clampSetting('scrimBlur', value)
     if (next === this.settings.scrimBlur) return
     this.settings.scrimBlur = next
     writeSetting('scrimBlur', next)
-    if (this.enabled) this.applySettings()
-  }
-
-  setRim(value: boolean): void {
-    if (value === this.settings.rim) return
-    this.settings.rim = value
-    writeFlag(RIM_KEY, value)
     if (this.enabled) this.applySettings()
   }
 
@@ -899,22 +809,34 @@ export class AquaLayer {
     else this.unmount()
   }
 
+  /** The kit pane parameters for the current knobs (playground scale). */
+  private glassPaneParams(): GlassPaneParams {
+    const s = this.settings
+    return {
+      mica: s.mode === 'mica',
+      overLight: !this.dark,
+      optics: {
+        blur: s.blur,
+        brightness: s.brightness,
+        refraction: s.refraction / 100,
+        depth: s.depth,
+        curvature: s.curvature,
+        dispersion: s.dispersion / 100,
+      },
+      highlight: s.highlight,
+      // Kit has no reduced-motion handling of its own: strength 0 keeps the
+      // panes rigid (and stops the pointer feed with them).
+      strength: prefersReducedMotion() ? 0 : (s.elasticity ? s.elasticityStrength : 0),
+    }
+  }
+
   /** Write the knob-driven CSS variables and mode attributes onto <html>. */
   private applySettings(): void {
     const style = document.documentElement.style
-    style.setProperty('--dsh-aqua-blur', `${this.settings.blur}px`)
-    // Frost 0-100 → a 0-1.4 alpha multiplier (50 = 1x). Capped so max frost
-    // stays translucent frosted glass instead of collapsing to a solid
-    // opaque slab (the dark card would otherwise hit 100% and read as solid
-    // navy).
-    style.setProperty('--dsh-aqua-frost', String(Math.min(this.settings.frost / 50, 1.4)))
-    // The new-session button's frost rides the same knob, +20 points.
-    style.setProperty('--dsh-aqua-surface-frost', String(Math.min((this.settings.frost + 20) / 50, 1.4)))
-    // Neutral white wash — not the fluid hue, so hover/press does not
-    // paint a cyan-blue cast on the glass.
-    style.setProperty('--dsh-aqua-spot-color', this.dark
-      ? 'rgba(255, 255, 255, 0.12)'
-      : 'rgba(255, 255, 255, 0.22)')
+    // Pending-frost fallback values (the pre-surface CSS frost that stands in
+    // for the kit's first frame): kept byte-identical to the kit low tier.
+    style.setProperty('--dsh-nico-blur', `${this.settings.blur}px`)
+    style.setProperty('--dsh-nico-brightness', String(this.settings.brightness))
     style.setProperty('--dsh-aqua-wallpaper-blur', `${this.settings.wallpaperBlur}px`)
     style.setProperty('--dsh-aqua-wallpaper-frost', String(this.settings.wallpaperFrost / 100))
     // Video wallpaper: blur rides the video's own filter; brightness drives
@@ -935,33 +857,20 @@ export class AquaLayer {
     document.documentElement.toggleAttribute('data-dsh-float', !compat)
     document.documentElement.toggleAttribute('data-dsh-compat', compat)
 
-    // Cursor spotlight and hover press ride the floating glass only —
-    // compat keeps the stock layout, so neither effect applies there.
-    document.documentElement.toggleAttribute(SPOTLIGHT_ATTRIBUTE, !compat && this.settings.spotlight)
-    document.documentElement.toggleAttribute(PRESS_ATTRIBUTE, !compat && this.settings.press)
-
     style.setProperty('--dsh-nico-scrim', String(this.settings.scrim / 100))
     style.setProperty('--dsh-nico-scrim-blur', `${this.settings.scrimBlur}px`)
-    style.setProperty('--dsh-nico-dispersion', String(this.settings.dispersion / 100))
-    style.setProperty('--dsh-nico-specular', String(this.settings.specular / 100))
     document.documentElement.toggleAttribute(
       'data-dsh-nico-scrim',
       this.settings.scrim > 0 || this.settings.scrimBlur > 0,
     )
-    syncRefraction({
-      enabled: this.enabled,
-      mica: !compat,
-      blur: this.settings.blur,
-      refract: this.settings.refract,
-      refractOn: this.settings.refractOn,
-      dispersion: this.settings.dispersion,
-      specular: this.settings.specular,
-    })
+
+    // The glass panes are the material now: push the kit params (no-op in
+    // compat mode, which stays token-level).
+    syncGlassPanes(this.glassPaneParams())
 
     // Backdrop source: flip the ambient container between fluid and wallpaper.
     const ambient = document.querySelector<HTMLElement>('[data-dsh-aqua-ambient]')
     if (ambient !== null) ambient.dataset.background = this.settings.background
-    if (ambient !== null) ambient.dataset.critters = this.settings.critters ? 'on' : 'off'
     // The wallpaper may be an image or a video: images and small videos are
     // data URLs; large videos are `idb:<id>` markers (blob in IndexedDB);
     // File System Access videos are `fsa:<name>` markers (the handle lives
@@ -1078,53 +987,12 @@ export class AquaLayer {
     this.applyTokens()
     this.mountFluid()
     this.startSeamStamper()
-    this.startSpotlightFeed()
-    this.refractDisposer?.()
-    this.refractDisposer = startRefraction(() => ({
-      enabled: this.enabled,
-      mica: this.settings.mode === 'mica',
-      blur: this.settings.blur,
-      refract: this.settings.refract,
-      refractOn: this.settings.refractOn,
-      dispersion: this.settings.dispersion,
-      specular: this.settings.specular,
-    }))
+    this.paneDisposer?.()
+    this.paneDisposer = startGlassPanes(() => this.glassPaneParams())
     this.padDisposer?.()
     this.padDisposer = startReadingPads(() => (
       this.enabled && (this.settings.scrim > 0 || this.settings.scrimBlur > 0)
     ))
-    this.rimDisposer?.()
-    this.rimDisposer = startRim(() => (
-      this.enabled && this.settings.mode === 'mica' && this.settings.rim
-    ))
-    this.syncWhale()
-    this.syncMesh()
-  }
-
-  /** Mount or drop the particle whale to match enabled + the whale flag. */
-  private syncWhale(): void {
-    if (this.enabled && this.settings.whale) {
-      if (this.whaleHandle !== undefined) return
-      const ambient = document.querySelector<HTMLElement>('[data-dsh-aqua-ambient]')
-      if (ambient === null) return
-      this.whaleHandle = mountWhale(ambient, this.dark)
-    } else {
-      this.whaleHandle?.dispose()
-      this.whaleHandle = undefined
-    }
-  }
-
-  /** Mount or drop the interactive mesh to match enabled + the mesh flag. */
-  private syncMesh(): void {
-    if (this.enabled && this.settings.mesh) {
-      if (this.meshHandle !== undefined) return
-      const ambient = document.querySelector<HTMLElement>('[data-dsh-aqua-ambient]')
-      if (ambient === null) return
-      this.meshHandle = mountMesh(ambient)
-    } else {
-      this.meshHandle?.dispose()
-      this.meshHandle = undefined
-    }
   }
 
   private unmount(): void {
@@ -1133,23 +1001,12 @@ export class AquaLayer {
     document.documentElement.removeAttribute('data-dsh-compat')
     document.documentElement.removeAttribute('data-dsh-aqua-wallpaper')
     document.documentElement.removeAttribute('data-dsh-aqua-media')
-    document.documentElement.removeAttribute(SPOTLIGHT_ATTRIBUTE)
-    document.documentElement.removeAttribute(PRESS_ATTRIBUTE)
-    this.spotlightDisposer?.()
-    this.spotlightDisposer = undefined
-    this.refractDisposer?.()
-    this.refractDisposer = undefined
+    this.paneDisposer?.()
+    this.paneDisposer = undefined
     this.padDisposer?.()
     this.padDisposer = undefined
-    this.rimDisposer?.()
-    this.rimDisposer = undefined
     document.documentElement.removeAttribute('data-dsh-nico-scrim')
     document.documentElement.removeAttribute('data-dsh-nico-home')
-    document.documentElement.removeAttribute('data-dsh-nico-refract')
-    this.whaleHandle?.dispose()
-    this.whaleHandle = undefined
-    this.meshHandle?.dispose()
-    this.meshHandle = undefined
     this.tokenDisposer?.()
     this.tokenDisposer = undefined
     if (this.videoObjectUrl !== undefined) {
@@ -1206,11 +1063,5 @@ export class AquaLayer {
   private startSeamStamper(): void {
     if (this.seamDisposer !== undefined) return
     this.seamDisposer = startSeamStamper()
-  }
-
-  /** Attach the cursor-spotlight pointer feeds (idempotent per mount). */
-  private startSpotlightFeed(): void {
-    if (this.spotlightDisposer !== undefined) return
-    this.spotlightDisposer = startSpotlight()
   }
 }

@@ -5,6 +5,8 @@
 - **面板玻璃改为由 [nico-glass-kit](https://github.com/more-nico/nico-glass-kit) `^0.3.0` 渲染**：header / 侧栏 / 作曲器 / 各 dock / 弹窗 / 后台任务 popover / 新建会话胶囊等 14 个面板统一注入 underlay 并 portal `GlassSurface`，圆角统一 32px；自绘玻璃配方与自研 SDF 折射（`refract.ts`）、鼠标辉光/压下（`spotlight.ts` / `spot-core.ts`）、鼠标描边（`rim.ts`）、粒子鲸鱼（`whale.ts`）、网状交互（`mesh.ts`）全部删除
 - **材质参数换成 kit 刻度**：玻璃模糊度 0-64px / 亮度 0-2 / 折射强度 0-100% / 折射深度 0-40px / 边缘曲率 0-1 / 边缘色散 0-100% / 边缘高光 0-2，默认值 = playground 默认（blur 3、brightness 1.1、refraction 100%、depth 8、curvature 0.2、dispersion 10%、highlight 1）；旧项 磨砂度 / 边缘光泽 / 折射开关 删除（kit 无对应语义）
 - **「悬停效果」改为 kit 弹性**（开关 + 强度 0-0.5，默认开）、删除「环境装饰」整组与鼠标辉光 / 鼠标描边 / 悬停下压；悬停时玻璃与其上的面板内容一起倾斜（指针转发 + `.ngs-motion` 位移镜像），裁剪自身溢出的宿主保持刚性，`prefers-reduced-motion` 下整体停用
+- 修复弹性倾斜时的分层：kit 只位移内层 `.ngs-motion`，外壳（`.ngs-surface`）连同它画的投影会留在宿主原位，露出「原位置的阴影弧 + 一条没磨砂的背景带」。现在样式表中和内层位移、由外壳承载偏移（`glass-panes.tsx`），玻璃、外壳投影与面板内容三者同偏移，面板整体倾斜
+- 修复设置浮层打开后背后的面板玻璃仍随鼠标滑动：浮层是宿主（侧栏列）的 fixed DOM 后代，鼠标在浮层上的 `pointermove` 冒泡进宿主，而指针远在面板盒之外、kit 的位移映射又不钳制，玻璃会被屏幕另一侧的指针拖走；现在只有真正落在面板盒内、且不来自宿主内部浮层的 move 才喂给 kit，其余按 `pointerleave` 处理，弹簧立即回正
 - 设置页控件全部换成 kit 组件（`GlassSlider` / `GlassInput` / `GlassSwitch` / `GlassSegmentedControl` / `GlassButton`），页面用 `GlassProvider` 包裹；模式 / 背景选择器沿用 playground device 底栏的胶囊语言：外胶囊内嵌、槽位同内边距内缩成胶囊（圆角同心）、选中态就是 kit 的 active 胶囊填充
 - 首帧兜底：surface 就绪前由宿主 `::before` 画与 kit low tier 逐项一致的 CSS 磨砂，交接不跳变
 - 关掉插件或切换到兼容模式后不残留 underlay 与宿主钩子；兼容模式仍为 token 级半透明玻璃，不建 pane

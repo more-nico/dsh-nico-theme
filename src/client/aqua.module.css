@@ -86,6 +86,16 @@
   border-radius: inherit;
 }
 
+/* The kit's spring translates only its inner `.ngs-motion` layer, which leaves
+   the shell — and the drop shadow it paints — outlining the resting box: while
+   the glass leans away, a shadow arc and an unfrosted strip stay visible at the
+   edge it left behind. The theme re-applies the offset on `.ngs-surface` itself
+   (glass-panes.tsx), so the inner translate is cancelled here and the shell
+   travels with the glass: the pane leans as one piece. */
+[data-dsh-aqua][data-dsh-float] [data-dsh-nico-pane] > [data-dsh-nico-pane-surface] :global(.ngs-motion) {
+  transform: none !important;
+}
+
 /* Pending frost: the kit's first client render is always the low tier and
    its displacement map waits for a ~100ms-throttled ResizeObserver, so a pane
    without a mounted surface yet would flash empty. This stand-in is drawn at

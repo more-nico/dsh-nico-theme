@@ -11,8 +11,12 @@
  * the kit's SVG filter registry renders inside it). Elasticity is the kit's
  * own spring: it only translates `.ngs-motion`, so the pointer feed comes
  * from the host and the same offset is mirrored onto the host's content boxes
- * to make the panel lean as one piece. Panes whose host clips its own
- * overflow stay rigid (a leaning surface would be cut off by the host).
+ * to make the panel lean as one piece. Only moves that land on the pane's own
+ * box are fed — floating overlays are fixed DOM descendants of a host (the
+ * settings dialog lives inside the sidebar column) and their moves would
+ * otherwise drag the glass toward a pointer that is nowhere near it. Panes
+ * whose host clips its own overflow stay rigid (a leaning surface would be
+ * cut off by the host).
  */
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
@@ -221,12 +225,26 @@ function NicoGlassPane({ instance, params }: NicoGlassPaneProps) {
 
   // Effect B — pointer feed: the underlay is click-transparent, so the host
   // receives the events; the kit's spring listens on the surface container.
+  // Moves are only fed while the pointer is on the pane's own box: a floating
+  // overlay is a fixed DOM descendant of the host (the settings dialog renders
+  // inside the sidebar column), so its moves bubble through the host from a
+  // point far outside the panel, and the kit maps the raw pointer position onto
+  // the surface without clamping — the glass would glide along with a cursor
+  // sitting on the other side of the screen. Off-pane moves are fed as a
+  // `pointerleave` instead, which parks the spring back at rest.
   useEffect(() => {
     if (underlay === null || strength <= 0) return
     const forward = (event: PointerEvent): void => {
       const surface = underlay.firstElementChild
       if (surface === null) return
-      surface.dispatchEvent(new PointerEvent(event.type, {
+      const rect = host.getBoundingClientRect()
+      const onBox = event.clientX >= rect.left && event.clientX <= rect.right
+        && event.clientY >= rect.top && event.clientY <= rect.bottom
+      // A dialog that contains the host is the pane's own overlay (the dialog
+      // pane itself); a dialog inside the host is a floating descendant.
+      const dialog = event.target instanceof Element ? event.target.closest(DIALOG_SELECTOR) : null
+      const onPane = onBox && (dialog === null || dialog.contains(host))
+      surface.dispatchEvent(new PointerEvent(onPane ? event.type : 'pointerleave', {
         bubbles: false,
         cancelable: false,
         composed: false,
@@ -248,7 +266,8 @@ function NicoGlassPane({ instance, params }: NicoGlassPaneProps) {
   }, [host, underlay, strength])
 
   // Effect C — lean mirror: the kit's spring only translates its own motion
-  // layer, so the same offset is written onto the host's content boxes.
+  // layer (cancelled in the stylesheet), so the offset is re-applied on the
+  // pane's shell and mirrored onto the host's content boxes.
   useEffect(() => {
     if (underlay === null || strength <= 0) return
     let targets: HTMLElement[] | null = null
@@ -262,7 +281,19 @@ function NicoGlassPane({ instance, params }: NicoGlassPaneProps) {
       return next
     }
 
+    // The shell owns the pane's drop shadow: if only the inner kit layer moves,
+    // the shadow keeps outlining the resting box, so a shadow arc and an
+    // unfrosted strip stay visible at the edge the glass left behind. Resolved
+    // per call — the portal commits after this effect runs.
+    const applyToShell = (x: number, y: number): void => {
+      const shell = underlay.firstElementChild
+      if (!(shell instanceof HTMLElement)) return
+      if (x === 0 && y === 0) shell.style.removeProperty('translate')
+      else shell.style.translate = `${x.toFixed(2)}px ${y.toFixed(2)}px`
+    }
+
     const write = (x: number, y: number): void => {
+      applyToShell(x, y)
       const list = targets ?? collect()
       for (const el of list) {
         if (x === 0 && y === 0) {
@@ -310,6 +341,7 @@ function NicoGlassPane({ instance, params }: NicoGlassPaneProps) {
     return () => {
       structure.disconnect()
       motion.disconnect()
+      applyToShell(0, 0)
       for (const el of targets ?? []) {
         el.style.removeProperty('translate')
         el.removeAttribute(LEAN_ATTRIBUTE)

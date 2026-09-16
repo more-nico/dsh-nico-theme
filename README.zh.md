@@ -15,6 +15,16 @@
   <img src="assets/rail-dark.png" alt="深色模式收起侧栏，流体铺满主栏" width="49%">
 </p>
 
+<p>
+  <img src="assets/settings-material.gif" alt="Nico Theme 设置页：材质滑杆与壁纸模糊度拖到 3px" width="100%">
+</p>
+
+<p>
+  <img src="assets/elastic-hover.gif" alt="悬停弹性：面板随指针一起倾斜" width="100%">
+</p>
+
+*上面的弹性片段以最大强度（0.5）录制，默认值是 0.2。*
+
 ## 来源
 
 本仓库是 [WYH66666666/DSH-Transparent-UI-Plugin](https://github.com/WYH66666666/DSH-Transparent-UI-Plugin) 的 **fork**（MIT，© 2026 John Wu），适配 **DSH 0.1.2-rc.1**。
@@ -71,6 +81,7 @@ pnpm bundle          # tsdown + lib/types/*.d.ts
 pnpm typecheck       # 用已安装的 DSH client 包跑 tsc --noEmit
 pnpm visual          # 对测试 profile 跑 Playwright
 pnpm readme-shots    # 刷新 assets/ 里的深色流体截图
+pnpm readme-gifs     # 录制 assets/*.gif（需 NICO_THEME_URL；设置页那段还需 NICO_WALLPAPER）
 ```
 
 维护者：`npm login`，然后 `git tag v0.1.0 && git push origin v0.1.0`。GitHub Actions 会发 npm（仓库要有 `NPM_TOKEN`）。也可以本地 `pnpm bundle` 后 `pnpm publish`。

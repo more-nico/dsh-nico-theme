@@ -15,6 +15,16 @@ Not affiliated with DeepSeek.
   <img src="assets/rail-dark.png" alt="Collapsed sidebar rail over the dark fluid backdrop" width="49%">
 </p>
 
+<p>
+  <img src="assets/settings-material.gif" alt="Nico Theme settings page: material knobs and the wallpaper blur slider dragged to 3px" width="100%">
+</p>
+
+<p>
+  <img src="assets/elastic-hover.gif" alt="Panels leaning together with the pointer under hover elasticity" width="100%">
+</p>
+
+*The elasticity clip is recorded at maximum strength (0.5); the default is 0.2.*
+
 ## Origins
 
 This repository is a **fork** of [WYH66666666/DSH-Transparent-UI-Plugin](https://github.com/WYH66666666/DSH-Transparent-UI-Plugin) (MIT, © 2026 John Wu), adapted for **DSH 0.1.2-rc.1**.
@@ -71,6 +81,7 @@ pnpm bundle          # tsdown + lib/types/*.d.ts
 pnpm typecheck       # tsc --noEmit against the installed DSH client packages
 pnpm visual          # Playwright checks against the test profile
 pnpm readme-shots    # refresh the dark-fluid images in assets/
+pnpm readme-gifs     # record assets/*.gif (needs NICO_THEME_URL; settings clip also needs NICO_WALLPAPER)
 ```
 
 Maintainers: `npm login`, then `git tag v0.1.0 && git push origin v0.1.0`. GitHub Actions publishes the tarball (needs repo secret `NPM_TOKEN`). Or `pnpm publish` locally after `pnpm bundle`.

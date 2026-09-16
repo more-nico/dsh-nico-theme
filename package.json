@@ -55,6 +55,7 @@
     "watch": "tsdown --watch",
     "visual": "node tests/visual.mjs",
     "readme-shots": "node tests/readme-shots.mjs",
+    "readme-gifs": "node tests/readme-gifs.mjs",
     "prepublishOnly": "pnpm bundle"
   },
   "keywords": [

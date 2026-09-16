@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.1
+
+- **peer 依赖的预发布范围改为显式 `||` 分支**：`^0.1.2-rc.1` 这类范围按 node-semver 的规则只会放行 `0.1.2` 元组上的预发布版本，装 DSH `0.1.3` / `0.1.5` / `0.1.6` 的预发布构建时会静默失败并报 `ERESOLVE`；现在写成 `^0.1.2-rc.1 || ^0.1.3-alpha.2 || ^0.1.5-rc.1 || ^0.1.6-alpha.1`（与市场内其他插件的写法一致），devDependencies 仍钉在实测过的 `0.1.2-rc.1`
+- 新增 `screenshots.json`：声明 `assets/hero-dark.png` / `chat-dark.png` / `rail-dark.png`，插件市场详情页按此顺序展示（不再从 README 自动抽取）
+
 ## 0.3.0
 
 - **面板玻璃改为由 [nico-glass-kit](https://github.com/more-nico/nico-glass-kit) `^0.3.0` 渲染**：header / 侧栏 / 作曲器 / 各 dock / 弹窗 / 后台任务 popover / 新建会话胶囊等 14 个面板统一注入 underlay 并 portal `GlassSurface`，圆角统一 32px；自绘玻璃配方与自研 SDF 折射（`refract.ts`）、鼠标辉光/压下（`spotlight.ts` / `spot-core.ts`）、鼠标描边（`rim.ts`）、粒子鲸鱼（`whale.ts`）、网状交互（`mesh.ts`）全部删除

@@ -32,11 +32,17 @@
   --dsh-nico-brightness: 1.1;
   --dsh-aqua-glass-line: rgba(36, 38, 42, 0.22);
   --dsh-aqua-glass-line-soft: rgba(36, 38, 42, 0.14);
+  --dsh-nico-control-text: var(--ngs-text);
+  --dsh-nico-control-muted: var(--ngs-text-dim);
+  --dsh-nico-control-rim: var(--ngs-rim-top-soft);
 }
 
 [data-dsh-aqua]:has(body[data-ds-dark-theme]) {
   --dsh-aqua-glass-line: rgba(220, 220, 224, 0.18);
   --dsh-aqua-glass-line-soft: rgba(220, 220, 224, 0.12);
+  --dsh-nico-control-text: var(--ngs-text);
+  --dsh-nico-control-muted: var(--ngs-text-dim);
+  --dsh-nico-control-rim: var(--ngs-rim-top-soft);
 }
 
 [data-dsh-aqua] [data-dsh-frame] {
@@ -67,6 +73,7 @@
   background: transparent !important;
   border-color: transparent;
   box-shadow: none;
+  backdrop-filter: none !important;
   /* Same corner as the glass, so the host's own clip (rounded corners,
      overflow) follows the surface instead of cutting a square hole. */
   border-radius: var(--dsh-nico-pane-radius, 32px);
@@ -96,6 +103,19 @@
   transform: none !important;
 }
 
+/* The kit debounces lens maps. While its raster still has the old dimensions,
+   keep the same material's blur/tint/highlight over the entire new box. */
+[data-dsh-float] [data-dsh-nico-lens-pending] :global(.ngs-effect),
+[data-dsh-float] [data-dragging] [data-dsh-nico-pane-surface] :global(.ngs-effect) {
+  backdrop-filter: blur(var(--dsh-nico-blur)) saturate(100%) brightness(var(--dsh-nico-brightness)) !important;
+}
+
+[data-dsh-float] [data-dsh-nico-lens-pending] > :global(.ngs-surface),
+[data-dsh-float] [data-dragging] [data-dsh-nico-pane-surface] > :global(.ngs-surface),
+[data-dsh-float] [data-dragging] [data-dsh-nico-lean] {
+  translate: none !important;
+}
+
 /* Pending frost: the kit's first client render is always the low tier and
    its displacement map waits for a ~100ms-throttled ResizeObserver, so a pane
    without a mounted surface yet would flash empty. This stand-in is drawn at
@@ -109,6 +129,72 @@
   pointer-events: none;
   border-radius: inherit;
   backdrop-filter: blur(var(--dsh-nico-blur, 3px)) saturate(100%) brightness(var(--dsh-nico-brightness, 1.1));
+}
+
+[data-dsh-float] [data-dsh-nico-pane] > [data-dsh-nico-native-material] {
+  display: none;
+}
+
+/* The subagent tree popup paints its native material on a pseudo-element,
+   unlike role=menu popups. The kit owns the popup's whole glass surface. */
+[data-dsh-aqua][data-dsh-float] [data-dsh-nico-pane='agent-menu']::before {
+  content: none;
+}
+
+/* Native layout paints must not cover the configured glass material. */
+[data-dsh-float] [data-rightbar-col],
+[data-dsh-float] [data-dockkit-surface],
+[data-dsh-float] [data-dockkit-pane],
+[data-dsh-float] [data-dsh-nico-rightbar-layout],
+[data-dsh-float] [data-dsh-nico-trajectory-ledger],
+[data-dsh-float] [data-dsh-nico-trajectory-plot] {
+  background: transparent;
+}
+
+[data-dsh-float] [data-trajectory-scroll] table {
+  background: transparent;
+}
+
+[data-dsh-float] :is([data-dsh-nico-compact], [data-dsh-nico-pane='header']) {
+  --dsw-alias-label-secondary: var(--dsh-nico-control-muted);
+  --dsw-alias-label-tertiary: var(--dsh-nico-control-muted);
+  --dsw-alias-label-caption: var(--dsh-nico-control-muted);
+}
+
+/* Metadata uses neutral text and fine outlines without adding material. */
+[data-dsh-float] [data-dsh-inputbar] button:not(:disabled):not([data-dsh-add]):not([data-dsh-nico-pane]):not([role='option']):not([role^='menuitem']) {
+  color: var(--dsh-nico-control-text);
+  background: transparent;
+  border-radius: 10px;
+  box-shadow: inset 0 1px 0 var(--dsh-nico-control-rim);
+}
+
+[data-dsh-float] [data-dsh-inputbar] button:not(:disabled):not([role='option']):not([role^='menuitem']):hover {
+  background: transparent;
+}
+
+[data-dsh-float] [data-composer-placeholder] {
+  color: var(--dsh-nico-control-muted);
+  text-shadow: 0 1px 2px rgb(0 0 0 / 0.16);
+}
+
+/* Before discovery, use the same configured frosting as the kit low tier. */
+[data-dsh-float] :is([role='menu'], [role='listbox'], [data-trigger-menu], [role='dialog']:not([aria-modal='true'])):not([data-dsh-nico-pane]):not(:global(.ngs-surface)):not([data-trigger-menu] *) {
+  background: transparent;
+  border-radius: 18px;
+  backdrop-filter: blur(var(--dsh-nico-blur)) saturate(100%) brightness(var(--dsh-nico-brightness));
+}
+
+[data-dsh-float] [data-dsh-nico-compact]:not(:has(> [data-dsh-nico-pane-surface] > :global(.ngs-surface)))::before {
+  background: transparent;
+  backdrop-filter: blur(var(--dsh-nico-blur)) saturate(100%) brightness(var(--dsh-nico-brightness));
+}
+
+/* The host's own frosting would become a second backdrop root. Native
+   pseudo-underlays are removed only after the kit has an effect layer. */
+[data-dsh-float] [data-dsh-nico-pane]:has(> [data-dsh-nico-pane-surface] :global(.ngs-effect))::before,
+[data-dsh-float] [data-dsh-nico-pane]:has(> [data-dsh-nico-pane-surface] :global(.ngs-effect))::after {
+  display: none;
 }
 
 /* Instant content lean: the kit's spring translates its own surface, and
@@ -152,6 +238,12 @@
 [data-dsh-float] header {
   margin: 12px 16px 0;
   padding: 10px 16px 8px;
+}
+
+/* Stock corner controls pull 16px past the title row's right edge. Keep the
+   floating glass button inside the card padding, with room for its spring. */
+[data-dsh-float] header [data-conversation-header-corner] {
+  margin-inline-end: 0;
 }
 
 /* Collapsed: the floating rail reaches 12px into the chat gutter, so the
@@ -332,10 +424,9 @@
   border-radius: 8px;
 }
 
-/* Composer attach "+": a brighter bead over the composer glass (fixed
-   scheme tint — the frost multiplier is gone with the hand-drawn recipe). */
+/* The attach control keeps the composer's configured material underneath. */
 [data-dsh-float] [data-dsh-add] {
-  background: rgb(255 255 255 / 0.42);
+  background: transparent;
   border: 1px solid var(--dsh-aqua-glass-line-soft);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
   backdrop-filter: blur(var(--dsh-nico-blur, 3px));
@@ -377,20 +468,21 @@ html[data-dsh-float][data-dsh-aqua-wallpaper][data-dsh-aqua-media='video'] body[
   border-radius: 14px;
 }
 
-/* Composer slot: the seat keeps the composer card's own geometry; the fused
-   slab is sized to the chat column so the glass hugs the composer exactly. */
+/* The composer seat sizes the card and its separate status capsules. */
 [data-dsh-aqua][data-dsh-float] [data-dsh-inputbar]:has([data-dsh-stats]) {
   width: calc(var(--dsh-chat-content-width) + 32px);
-  max-width: none;
+  max-width: calc(100% - 32px);
+  min-width: 0;
   margin: 0 auto 12px;
   padding: 0;
 }
 
-/* Inside the fused slab the composer card and the stats band contribute no
-   paint of their own — the inputbar pane's glass is the single surface. */
+/* Only the input card owns the composer glass; the status row has no slab. */
 [data-dsh-float] [data-dsh-inputbar]:has([data-dsh-stats]) [data-composer-card] {
+  width: 100%;
+  min-width: 0;
   border: none;
-  border-radius: 0;
+  border-radius: var(--dsh-nico-pane-radius, 32px);
   background: transparent;
   box-shadow: none;
   backdrop-filter: none;
@@ -401,32 +493,20 @@ html[data-dsh-float][data-dsh-aqua-wallpaper][data-dsh-aqua-media='video'] body[
 }
 
 [data-dsh-float] [data-dsh-inputbar]:has([data-dsh-stats]) [data-dsh-stats] {
-  width: 100%;
-  max-width: none;
-  /* Dock at the very bottom of the slab: the band's MIN height equals the
-     24px corner radius, so the divider lands exactly where the left/right
-     bottom corners start to curve. Block layout (not flex) keeps the stock
-     single-line ellipsis, so long stats never spill past the right edge. */
-  margin: auto 0 0;
-  min-height: 24px;
+  /* Expose both status anchors alongside context as three equal flex items. */
+  display: contents;
+  margin: 0;
+  min-height: 0;
   box-sizing: border-box;
-  display: block;
-  padding: 2px 16px;
+  padding: 0;
   border: none;
-  border-top: 1px solid var(--dsh-aqua-glass-line-soft);
   border-radius: 0;
   background: transparent;
   box-shadow: none;
   backdrop-filter: none;
 }
 
-[data-dsh-float] body[data-ds-dark-theme] [data-dsh-inputbar]:has([data-dsh-stats]) [data-dsh-stats] {
-  border-top-color: var(--dsh-aqua-glass-line-soft);
-}
-
-/* Stats line: the docked band keeps its slot height in the non-fused state
-   too, and the stats text stays neutral slate (dark on light glass,
-   near-white on dark glass) — no stock blue-gray cast. */
+/* Status text stays neutral slate (dark on light, near-white on dark). */
 [data-dsh-float] [data-dsh-inputbar]:not([class*='hero']) {
   padding-bottom: 12px;
 }
@@ -473,6 +553,43 @@ html[data-dsh-float][data-dsh-aqua-wallpaper][data-dsh-aqua-media='video'] body[
   padding: 10px 12px 14px;
 }
 
+/* One inset glass shell for the entire right sidebar, including split panes.
+   Keep the native width variable and resize handle's grid track unchanged. */
+[data-dsh-float] [data-sidebar-right-panel][data-sidebar-right-open='true'] {
+  box-sizing: border-box;
+  top: 12px;
+  bottom: 12px;
+  right: 12px;
+  width: calc(var(--dsh-sidebar-width) - 24px) !important;
+  padding: 10px 12px 14px;
+}
+
+[data-dsh-float] [data-sidebar-right-panel='fullscreen'][data-sidebar-right-open='true'] {
+  z-index: 40;
+}
+
+[data-dsh-float] [data-sidebar-right-panel] [data-dockkit-host='dock'] > [data-dockkit-pane] {
+  border: 0;
+  border-radius: 20px;
+  box-shadow: none;
+  overflow: visible;
+}
+
+[data-dsh-float] [data-sidebar-right-panel] [data-dockkit-strip] {
+  align-items: center;
+  min-height: 40px;
+  padding: 4px 8px;
+  gap: 8px;
+}
+
+[data-dsh-float] [data-sidebar-right-guide-entry],
+[data-dsh-float] [data-sidebar-right-guide] [class*='terminalEntry'] {
+  background: var(--dsh-nico-hover);
+  border-color: var(--dsh-aqua-glass-line-soft);
+  border-radius: 22px;
+  box-shadow: inset 0 1px 0 var(--dsh-nico-control-rim);
+}
+
 /* Expanded only. Stock overflow:hidden + a frosted surface blobs the
    wordmark; the kit refracts instead, so the host's own clip is released
    (a clipping host would cut the leaning glass and is kept rigid). Must NOT
@@ -481,6 +598,12 @@ html[data-dsh-float][data-dsh-aqua-wallpaper][data-dsh-aqua-media='video'] body[
    chat (the ghost in all_error). */
 [data-dsh-float] [data-dsh-frame]:not([data-sidebar-collapsed]) [class*='sidebarCol'] {
   overflow: visible !important;
+}
+
+/* The toggle sits at the logo row's right edge. Let its glass shadow and
+   elastic offset extend beyond that row instead of cutting a straight seam. */
+[data-dsh-float] [data-dsh-frame]:not([data-sidebar-collapsed]) [data-dsh-sidebar-root] [class*='logoRow'] {
+  overflow: visible;
 }
 
 /* data-slot=sidebar is display:contents, so column > * never lifts the
@@ -504,7 +627,7 @@ html[data-dsh-float][data-dsh-aqua-wallpaper][data-dsh-aqua-media='video'] body[
 [data-dsh-float] [data-dsh-frame][data-sidebar-collapsed] [class*='sidebarCol'] {
   margin: 12px -12px 12px 12px;
   padding: 0;
-  border-radius: 16px;
+  border-radius: 32px;
   /* Clip the frozen expanded inner root so it cannot ghost into the chat. */
   overflow: hidden !important;
   transition: margin 150ms var(--ds-ease-in-out), border-radius 150ms var(--ds-ease-in-out);
@@ -520,6 +643,52 @@ html[data-dsh-float][data-dsh-aqua-wallpaper][data-dsh-aqua-media='video'] body[
   width: 100% !important;
 }
 
+/* Collapsed entries each own a circular surface, including workspace tools.
+   The expanded workspace capsule's padding must not shift its rail icon. */
+[data-dsh-float] [data-sidebar-collapsed] [data-dsh-sidebar-root][class*='collapsed'] {
+  width: 100% !important;
+}
+
+[data-dsh-float] [data-sidebar-collapsed] [data-dsh-sidebar-root] [class*='logoRow'] {
+  overflow: visible;
+}
+
+[data-dsh-float] [data-sidebar-collapsed] [data-dsh-sidebar-root] :is([class*='regionArea'], [class*='settingsArea']) {
+  width: 36px;
+  align-self: flex-start;
+}
+
+[data-dsh-float] [data-sidebar-collapsed] [data-dsh-sidebar-root] [class*='sectionHeader'][data-dsh-nico-control-group] {
+  width: 100%;
+  min-height: 36px;
+  padding: 0;
+  margin: 0 0 12px;
+  justify-content: center;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+[data-dsh-float] [data-sidebar-collapsed] [data-dsh-sidebar-root] [class*='headerActions'] {
+  width: 100%;
+  justify-content: center;
+}
+
+[data-dsh-float] [data-sidebar-collapsed] [data-dsh-sidebar-root] button[data-dsh-nico-pane='rail-button'] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  min-height: 36px;
+  padding: 0;
+  margin-inline: auto;
+  border: 0;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
 /* While the settings dialog is open, the sidebar must outrank every other
    floating pane: the overlay is a fixed descendant of the column, so the
    column's stacking context has to sit on top. */
@@ -528,8 +697,7 @@ html[data-dsh-float][data-dsh-aqua-wallpaper][data-dsh-aqua-media='video'] body[
   overflow: visible;
 }
 
-/* ---------- Trajectory view: layout only — glass via the pane layer. The
-   toolbar and timeline surfaces go transparent so the glass shows through. ---------- */
+/* ---------- Trajectory view: reading pad with clear inner surfaces. ---------- */
 [data-dsh-float] [data-dsh-trajectory] {
   margin: 8px 16px 12px;
   width: calc(100% - 32px);
@@ -537,35 +705,348 @@ html[data-dsh-float][data-dsh-aqua-wallpaper][data-dsh-aqua-media='video'] body[
   overflow: hidden;
 }
 
-[data-dsh-float] [data-dsh-trajectory] [role='toolbar'],
 [data-dsh-float] [data-dsh-trajectory] section[aria-label='Trajectory timeline'] {
   background: transparent;
 }
 
-/* ---------- Long tail: menus stay on plain CSS frosting (fixed scheme
-   colours — the frost multiplier went away with the hand-drawn recipes). ---------- */
-[data-dsh-float] [role='menu'] {
-  background: rgb(255 255 255 / 0.62);
-  backdrop-filter: blur(var(--dsh-nico-blur, 3px));
+/* Selection gets a rounded outline and stronger text on the sidebar glass. */
+[data-dsh-float] [data-dsh-sidebar-root] [data-row-key^='session:'][aria-selected='true'] {
+  background: var(--dsh-nico-selection, var(--ngs-active-bg));
+  border-radius: 12px;
+  box-shadow: none;
 }
 
-[data-dsh-float] body[data-ds-dark-theme] [role='menu'] {
-  background: rgb(28 32 42 / 0.68);
+[data-dsh-float] [data-dsh-nico-row-title] {
+  color: var(--dsh-nico-control-text);
 }
 
-/* ---------- Sidebar: the selected session gets an accent bar and a soft halo. ---------- */
-[data-dsh-float] [role='treeitem'][aria-selected='true'] {
-  box-shadow:
-    inset 2px 0 0 var(--dsw-specific-sidebar-nav-item-active-accent),
-    0 0 16px rgba(110, 155, 232, 0.14);
+[data-dsh-float] [data-row-key][aria-selected='true'] [data-dsh-nico-row-title] {
+  font-weight: 600;
 }
 
-/* ---------- Hover light: buttons and menu cells answer with a soft blue ring. ---------- */
+[data-dsh-float] [data-dsh-nico-row-meta] {
+  color: var(--dsh-nico-control-muted);
+}
+
+[data-dsh-float] [data-dsh-sidebar-root] [data-row-key^='session:']:hover:not([aria-selected='true']) {
+  background: var(--dsh-nico-hover, var(--ngs-tint-hover));
+  border-radius: 12px;
+}
+
+/* Rounded outlines distinguish navigation without changing glass opacity. */
+[data-dsh-float] [data-conversation-tabs] {
+  width: fit-content;
+  gap: 4px;
+  margin-top: 8px;
+  margin-bottom: 2px;
+  padding: 4px;
+  border-radius: 999px;
+  background: transparent;
+  box-shadow: inset 0 1px 0 var(--dsh-nico-control-rim), inset 0 0 0 1px var(--dsh-aqua-glass-line-soft);
+}
+
+[data-dsh-float] [data-conversation-tabs] [role='tab'] {
+  min-width: 62px;
+  padding: 6px 16px;
+  border-radius: 999px;
+  color: var(--dsh-nico-control-muted);
+  background: transparent;
+  transition: background-color 140ms ease, color 140ms ease, box-shadow 140ms ease;
+}
+
+[data-dsh-float] [data-conversation-tabs] [role='tab']::after {
+  display: none;
+}
+
+[data-dsh-float] [data-conversation-tabs] [role='tab'][aria-selected='true'] {
+  background: var(--dsh-nico-selection, var(--ngs-active-bg));
+  color: var(--dsh-nico-control-text);
+  font-weight: 600;
+  box-shadow: inset 0 1px 0 var(--dsh-nico-control-rim), 0 2px 6px rgb(0 0 0 / 0.12);
+}
+
+[data-dsh-float] [data-conversation-tabs] [role='tab']:hover:not([aria-selected='true']) {
+  background: var(--dsh-nico-hover, var(--ngs-tint-hover));
+  color: var(--dsh-nico-control-text);
+}
+
+[data-dsh-float] :is([data-dsh-nico-header-action], [data-dsh-nico-sidebar-action]) {
+  color: var(--dsh-nico-control-text);
+  border-radius: 999px;
+  background: transparent;
+  box-shadow: none;
+  transition: background-color 140ms ease, box-shadow 140ms ease;
+}
+
+[data-dsh-float] :is([data-dsh-nico-header-action], [data-dsh-nico-sidebar-action]):hover:not(:disabled) {
+  background: transparent;
+}
+
+/* GlassSelect option geometry and state tokens, read from the kit surface.
+   Selection fill is the playground's semantic highlight, not pane material. */
+[data-dsh-float] :is([role='menu'], [role='listbox']) {
+  --dsh-nico-list-pad: 5px;
+  padding: var(--dsh-nico-list-pad);
+  gap: 2px;
+}
+
+[data-dsh-float] :is([role='menuitem'], [role='menuitemradio'], [role='option']) {
+  min-height: 32px;
+  padding: 6px 10px;
+  color: var(--dsh-nico-control-text);
+  border: 0;
+  border-radius: max(4px, calc(var(--dsh-nico-pane-radius, 18px) - var(--dsh-nico-list-pad, 5px)));
+  background: transparent;
+  box-shadow: none;
+  transition: background-color var(--ngs-transition-fast), color var(--ngs-transition-fast);
+}
+
+[data-dsh-float] :is([role='menuitem'], [role='menuitemradio'], [role='option']):is(:hover, :focus-visible):not(:disabled):not([aria-disabled='true']) {
+  background: var(--dsh-nico-hover, var(--ngs-tint-hover));
+}
+
+[data-dsh-float] :is([role='menuitem'], [role='menuitemradio'], [role='option']):is([aria-selected='true'], [aria-checked='true'], :has(> [data-dsh-nico-option-check])) {
+  background: var(--dsh-nico-selection, var(--ngs-active-bg));
+}
+
+[data-dsh-float] [data-row-key][aria-selected='true'] > [data-dsh-nico-row-leading]::before {
+  content: '✓';
+  color: var(--dsh-nico-control-text);
+  font-size: 14px;
+}
+
+/* Avoid an opacity animation backdrop root while the configured kit pane
+   mounts; the temporary frosting uses the same settings. */
+[data-dsh-float] [role='tooltip'] {
+  color: var(--dsh-nico-control-text);
+  background: transparent;
+  border: 1px solid var(--dsh-aqua-glass-line-soft);
+  border-radius: 10px;
+  backdrop-filter: blur(var(--dsh-nico-blur)) saturate(100%) brightness(var(--dsh-nico-brightness));
+  box-shadow: inset 0 1px 0 var(--dsh-nico-control-rim), 0 4px 16px rgb(0 0 0 / 0.18);
+  animation: none;
+}
+
+/* ---------- Neutral hover sheen shared by the remaining controls. ---------- */
 [data-dsh-float] button[class*='button']:hover:not(:disabled),
-[data-dsh-float] [role='menuitem']:hover:not(:disabled) {
+[data-dsh-float] [data-dsh-nico-header-action]:hover:not(:disabled) {
   box-shadow:
-    0 0 12px rgba(110, 155, 232, 0.16),
+    0 2px 8px rgba(0, 0, 0, 0.12),
     inset 0 0 0 1px var(--dsh-aqua-glass-line-soft);
+}
+
+/* Playground geometry: one capsule per tool group, quiet round hit targets
+   inside it, and a real round kit surface for isolated icon controls. */
+[data-dsh-float] [data-dsh-nico-control-group] {
+  box-sizing: border-box;
+  min-height: 40px;
+  padding: 4px;
+  gap: 4px;
+  border-radius: 999px;
+  box-shadow: none;
+  flex-shrink: 0;
+}
+
+[data-dsh-float] header [class*='headerUtilities'][data-dsh-nico-control-group],
+[data-dsh-float] [data-conversation-scroll] [class*='actions'][data-dsh-nico-control-group] {
+  width: fit-content;
+  max-width: 100%;
+  flex-wrap: wrap;
+}
+
+/* Reply actions sit on the conversation pad and follow its text palette. */
+[data-dsh-float] [data-conversation-scroll] [data-clock='end'][data-dsh-nico-control-group] {
+  --dsh-nico-control-text: var(--dsw-alias-label-primary);
+  --dsh-nico-hover: var(--dsw-alias-interactive-bg-hover);
+  /* Native icon rows use a negative margin to align bare glyphs. The shared
+     pad aligns by its outer edge instead. */
+  margin-inline: 0;
+}
+
+/* The open-in split button is already inside the header's shared capsule. */
+[data-dsh-float] header [data-dsh-nico-control-group] [data-open-target] {
+  display: flex;
+  align-items: center;
+  height: 32px;
+  min-height: 32px;
+  gap: 4px;
+  overflow: visible;
+  border-radius: 999px;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+[data-dsh-float] header [data-dsh-nico-control-group] button[data-dsh-nico-header-action] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+[data-dsh-float] [data-dsh-nico-control-group]:not(:has(button)) {
+  min-height: 0;
+  padding: 0;
+}
+
+[data-dsh-float] [data-dsh-sidebar-root] [data-dsh-nico-control-group] {
+  margin: 6px 0 10px;
+  padding: 4px 6px;
+}
+
+[data-dsh-float] [data-dsh-nico-control-group] > [class*='sectionLabel'] {
+  padding-left: 6px;
+  font-size: 12px;
+}
+
+[data-dsh-float] [data-dsh-nico-control-group] [class*='headerActions'] {
+  gap: 2px;
+}
+
+[data-dsh-float] [data-dsh-nico-control-group] button:not([role='menuitem']):not([role='option']):not([data-dockkit-tab-close]),
+[data-dsh-float] [data-dsh-nico-icon-control] {
+  box-sizing: border-box;
+  min-width: 32px;
+  min-height: 32px;
+  border: 0;
+  border-radius: 999px;
+  color: var(--dsh-nico-control-text);
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  transition: background-color 140ms ease, color 140ms ease;
+}
+
+[data-dsh-float] [data-dsh-nico-control-group] :is([data-dsh-nico-sidebar-action], [data-dsh-add]),
+[data-dsh-float] [data-dsh-nico-icon-control] {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  padding: 0;
+}
+
+[data-dsh-float] [data-dsh-nico-control-group] button:hover:not(:disabled) {
+  background: var(--dsh-nico-hover);
+  box-shadow: none;
+}
+
+[data-dsh-float] [data-dsh-nico-control-group] button[role='tab'][aria-selected='true'],
+[data-dsh-float] [data-dockkit-tab][aria-selected='true'] {
+  background: var(--dsh-nico-selection);
+  box-shadow: inset 0 1px 0 var(--dsh-nico-control-rim);
+}
+
+[data-dsh-float] [data-composer-card] [class*='tools'] {
+  align-items: center;
+  gap: 12px;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+[data-dsh-float] [data-composer-card] [data-dsh-nico-icon-control]:not([data-dsh-add]) {
+  width: 36px;
+  height: 36px;
+}
+
+[data-dsh-float] [data-composer-card] button[data-dsh-nico-select-control] {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 6px 12px;
+  border: 0;
+  border-radius: 999px;
+  box-shadow: none;
+}
+
+/* Three independent capsules, centered as a group with equal spacing. */
+[data-dsh-float] [data-dsh-inputbar] > [class*='dock'][data-dsh-nico-control-group] {
+  width: calc(100% - 16px);
+  margin: 4px 8px 8px;
+  min-height: 36px;
+  padding: 4px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+[data-dsh-float] [data-dsh-inputbar] > [class*='dock'][data-dsh-nico-control-group] [data-dsh-stats] {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-height: 0;
+}
+
+[data-dsh-float] [data-dsh-inputbar] > [class*='dock'] [data-dsh-stats] > *,
+[data-dsh-float] [data-dsh-inputbar] > [class*='dock'] > [class*='root'] {
+  flex: none;
+  margin: 0;
+}
+
+[data-dsh-float] [data-dsh-inputbar] > [class*='dock'][data-dsh-nico-control-group] button {
+  min-height: 28px;
+  padding: 4px 8px;
+  box-shadow: none;
+}
+
+[data-dsh-float] [data-dockkit-strip-chrome] {
+  display: flex;
+  align-items: center;
+}
+
+[data-dsh-float] [data-dockkit-strip] {
+  min-height: 40px;
+  padding: 4px 8px;
+  margin-bottom: 8px;
+}
+
+/* Set chrome sizes before the kit attaches: DSH measures the tab viewport
+   in its layout effect to reveal the active tab, including its close button. */
+[data-dsh-float] [data-dockkit-strip] button:not([data-dockkit-tab-close]) {
+  box-sizing: border-box;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
+}
+
+[data-dsh-float] [data-dockkit-tab] {
+  box-sizing: border-box;
+  min-width: 100px;
+  height: 32px;
+  padding: 0 30px 0 10px;
+  border-radius: 999px;
+}
+
+[data-dsh-float] [data-dockkit-strip-tabs] {
+  height: 32px;
+  mask-image: none;
+}
+
+[data-dsh-float] [data-dockkit-strip] button[data-dockkit-tab-close] {
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  min-height: 20px;
+  padding: 0;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+[data-dsh-float] [data-dockkit-tab][aria-selected='true'] button[data-dockkit-tab-close] {
+  opacity: 1;
 }
 
 /* ---------- Page edge fades: 5px gradient blur bands pinned to the top and
@@ -668,6 +1149,17 @@ html[data-dsh-float][data-dsh-aqua-wallpaper][data-dsh-aqua-media='video'] body[
   animation: dsh-aqua-dialog-in 0.24s var(--ds-ease-in-out);
 }
 
+/* Settings contain a scrollport and nested glass controls. Animating opacity
+   or scale on their ancestor changes the backdrop root during the lens
+   hand-off; keep this window on one stable compositor layer. */
+[data-dsh-float] [data-shortcut-modal='settings'] {
+  animation: none;
+}
+
+[data-dsh-float] [data-shortcut-modal='settings'] > [data-dsh-nico-pane-surface] :global(.ngs-motion) {
+  will-change: auto;
+}
+
 @keyframes dsh-aqua-hero-in {
   from { opacity: 0; }
 }
@@ -690,7 +1182,9 @@ html[data-dsh-float][data-dsh-aqua-wallpaper][data-dsh-aqua-media='video'] body[
 
 /* ---------- Conversation reading pads (Liquid Glass transplant). ---------- */
 [data-dsh-aqua][data-dsh-nico-scrim] [data-dsh-nico-pad='assistant'],
-[data-dsh-aqua][data-dsh-nico-scrim] [data-dsh-nico-pad='expand'] {
+[data-dsh-aqua][data-dsh-nico-scrim] [data-dsh-nico-pad='expand'],
+[data-dsh-aqua][data-dsh-nico-scrim] [data-dsh-nico-pad='trajectory'],
+[data-dsh-aqua][data-dsh-nico-scrim] [data-dsh-nico-pad='actions'] {
   box-sizing: border-box;
   max-width: 100%;
   min-width: 0;
@@ -704,8 +1198,24 @@ html[data-dsh-float][data-dsh-aqua-wallpaper][data-dsh-aqua-media='video'] body[
 }
 
 [data-dsh-aqua][data-dsh-nico-scrim] body[data-ds-dark-theme] [data-dsh-nico-pad='assistant'],
-[data-dsh-aqua][data-dsh-nico-scrim] body[data-ds-dark-theme] [data-dsh-nico-pad='expand'] {
+[data-dsh-aqua][data-dsh-nico-scrim] body[data-ds-dark-theme] [data-dsh-nico-pad='expand'],
+[data-dsh-aqua][data-dsh-nico-scrim] body[data-ds-dark-theme] [data-dsh-nico-pad='trajectory'],
+[data-dsh-aqua][data-dsh-nico-scrim] body[data-ds-dark-theme] [data-dsh-nico-pad='actions'] {
   background: rgb(12 14 20 / var(--dsh-nico-scrim, 0.25));
+}
+
+[data-dsh-aqua][data-dsh-nico-scrim] [data-dsh-nico-pad='trajectory'] {
+  padding: 0;
+  border: 0;
+  border-radius: 32px;
+  box-shadow: none;
+}
+
+[data-dsh-aqua][data-dsh-nico-scrim] [data-dsh-nico-pad='actions'] {
+  padding: 4px 8px;
+  margin-inline: 0;
+  border-radius: 999px;
+  box-shadow: none;
 }
 
 [data-dsh-aqua][data-dsh-nico-scrim] [data-dsh-nico-pad='user'] {
@@ -836,7 +1346,7 @@ html[data-dsh-float][data-dsh-aqua-wallpaper][data-dsh-aqua-media='video'] body[
 [data-dsh-compat] [class*='panel'],
 [data-dsh-compat] [class*='popover'],
 [data-dsh-compat] [class*='dropdown'] {
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(var(--dsh-nico-blur)) saturate(100%) brightness(var(--dsh-nico-brightness));
 }
 
 /* ---------- Reduced motion: keep the static look, drop every effect. ---------- */

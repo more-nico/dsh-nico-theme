@@ -4,7 +4,10 @@
  * wallpaper/action capsule buttons. Kept in one file so the page stays a
  * single surface.
  */
-import type { ReactNode } from 'react';
+import { type ReactNode } from 'react';
+import type { GlassSurfaceProps } from 'nico-glass-kit';
+export type ControlMaterial = Pick<GlassSurfaceProps, 'optics' | 'elasticity' | 'highlightIntensity' | 'hoverBrightnessBoost'>;
+export declare const ControlMaterialContext: import("react").Context<ControlMaterial>;
 /** One slider + number box, wired to a single value. */
 export interface KnobProps {
     label: string;

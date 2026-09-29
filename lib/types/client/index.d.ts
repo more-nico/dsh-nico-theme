@@ -2,7 +2,7 @@
  * Aqua client plugin body: the toggleable glassmorphism skin. Owns the durable
  * enable flag (localStorage), applies/retracts the theme layer through
  * {@link AquaLayer}, and registers two settings surfaces:
- * - the master on/off card into the Plugins section (`settings.plugin.item`);
+ * - the master on/off card into the Plugins section (`settings.plugins.tab`);
  * - a dedicated left-nav settings page (`settings.section`, id `nico`)
  *   that now owns every glass knob (the old General → 外观 row has been
  *   removed — native 浅色/深色 stays alone).

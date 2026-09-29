@@ -2,7 +2,7 @@
  * Aqua client plugin body: the toggleable glassmorphism skin. Owns the durable
  * enable flag (localStorage), applies/retracts the theme layer through
  * {@link AquaLayer}, and registers two settings surfaces:
- * - the master on/off card into the Plugins section (`settings.plugin.item`);
+ * - the master on/off card into the Plugins section (`settings.plugins.tab`);
  * - a dedicated left-nav settings page (`settings.section`, id `nico`)
  *   that now owns every glass knob (the old General → 外观 row has been
  *   removed — native 浅色/深色 stays alone).
@@ -18,7 +18,7 @@ import type { BoundActions } from '@deepseek-ai/dsh-client-ui-slots'
 // SlotRegistry moved from dsh-client-runtime to dsh-client-ui-renderer in
 // DSH 0.1.2.
 import type {} from '@deepseek-ai/dsh-client-ui-renderer/client'
-// Type-only: pulls the `settings.plugin.item` SlotMap merge.
+// Type-only: provides the Plugins section that owns `settings.plugins.tab`.
 import type {} from '@deepseek-ai/dsh-client-ui-settings-plugins/client'
 // Type-only: pulls the settings SlotMap merge (`settings.section`).
 import type {} from '@deepseek-ai/dsh-client-ui-settings/client'
@@ -197,12 +197,12 @@ export function apply(ctx: ClientContext): void {
     return createInjected()
   }
 
-  // Master switch card in the Plugins configurable tab. The slot is keyed
-  // by the settings namespace a card edits, so the key must equal the
-  // 'nico' namespace the node half registers (see src/index.ts).
-  ctx.slots.inject('settings.plugin.item', () => ctx.slots.register({
-    name: 'settings.plugin.item',
-    key: 'nico',
+  // DSH 0.1.7 replaced keyed configuration cards with feature-owned tabs.
+  ctx.slots.inject('settings.plugins.tab', () => ctx.slots.register({
+    name: 'settings.plugins.tab',
+    id: 'nico',
+    order: 90,
+    label: () => ctx.locale.bind(NS)('aqua.pageTitle'),
     store: pluginStore,
     locale: NS,
     inject: pluginInjected,

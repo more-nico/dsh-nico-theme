@@ -4,9 +4,13 @@
  * wallpaper/action capsule buttons. Kept in one file so the page stays a
  * single surface.
  */
-import type { ReactNode } from 'react'
+import { createContext, useContext, type ReactNode } from 'react'
+import type { GlassSurfaceProps } from 'nico-glass-kit'
 import { GlassButton, GlassInput, GlassSegmentedControl, GlassSlider, GlassSwitch } from 'nico-glass-kit'
 import css from './AquaAppearanceRow.module.css'
+
+export type ControlMaterial = Pick<GlassSurfaceProps, 'optics' | 'elasticity' | 'highlightIntensity' | 'hoverBrightnessBoost'>
+export const ControlMaterialContext = createContext<ControlMaterial>({})
 
 /** One slider + number box, wired to a single value. */
 export interface KnobProps {
@@ -21,12 +25,14 @@ export interface KnobProps {
 
 /** Render one knob row. */
 export function Knob({ label, value, min, max, step, unit, onChange }: KnobProps) {
+  const material = useContext(ControlMaterialContext)
   const clamp = (n: number) => Math.min(max, Math.max(min, Number.isFinite(n) ? n : min))
   const safeValue = clamp(value)
   return (
     <label className={css.knob}>
       <span className={css.knobLabel}>{label}</span>
       <GlassSlider
+        {...material}
         className={css.slider}
         min={min}
         max={max}
@@ -36,6 +42,7 @@ export function Knob({ label, value, min, max, step, unit, onChange }: KnobProps
       />
       <span className={css.numberWrap}>
         <GlassInput
+          {...material}
           className={css.number}
           type="number"
           size="sm"
@@ -73,8 +80,10 @@ export interface SegmentedProps<T extends string> {
 
 /** Render a two-option segmented picker (compact pills or large cards). */
 export function Segmented<T extends string>({ label, value, options, onSelect, variant = 'compact' }: SegmentedProps<T>) {
+  const material = useContext(ControlMaterialContext)
   return (
     <GlassSegmentedControl
+      {...material}
       className={variant === 'cards' ? css.segmentedCards : css.segmented}
       aria-label={label}
       items={options.map(option => ({
@@ -99,8 +108,10 @@ export interface ToggleProps {
 
 /** Render the compact switch used by every boolean appearance setting. */
 export function Toggle({ label, pressed, onChange }: ToggleProps) {
+  const material = useContext(ControlMaterialContext)
   return (
     <GlassSwitch
+      {...material}
       className={css.toggle}
       aria-label={label}
       checked={pressed}
@@ -118,8 +129,10 @@ export interface PickButtonProps {
 
 /** Capsule action button (choose image / choose video / delete / enable). */
 export function PickButton({ children, onClick, danger = false }: PickButtonProps) {
+  const material = useContext(ControlMaterialContext)
   return (
     <GlassButton
+      {...material}
       className={danger ? `${css.pickButton} ${css.deleteButton}` : css.pickButton}
       size="sm"
       onClick={onClick}

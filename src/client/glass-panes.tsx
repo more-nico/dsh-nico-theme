@@ -15,14 +15,15 @@
  * box are fed — floating overlays are fixed DOM descendants of a host (the
  * settings dialog lives inside the sidebar column) and their moves would
  * otherwise drag the glass toward a pointer that is nowhere near it. Panes
- * whose host clips its own overflow stay rigid (a leaning surface would be
- * cut off by the host).
+ * share the same material settings. The settings window stays stationary:
+ * its clipped scroll area contains independently animated glass controls.
  */
-import { useEffect, useState } from 'react'
-import { createPortal } from 'react-dom'
+import { useEffect, useLayoutEffect, useMemo, useState } from 'react'
+import { createPortal, flushSync } from 'react-dom'
 import { createRoot } from 'react-dom/client'
 import { GlassProvider, GlassSurface } from 'nico-glass-kit'
 import 'nico-glass-kit/style.css'
+import { guardLensResize } from './lens-resize-guard'
 
 /** Marker attribute on a pane host. */
 const PANE_ATTRIBUTE = 'data-dsh-nico-pane'
@@ -66,7 +67,7 @@ export interface GlassPaneParams {
 /** One pane: what to cover, and where to find it. */
 interface PaneDef {
   readonly key: string
-  readonly select: () => HTMLElement | null
+  readonly select: () => HTMLElement | readonly HTMLElement[] | null
 }
 
 /** One resolved pane instance (host element resolved at sync time). */
@@ -75,13 +76,16 @@ interface PaneInstance {
   readonly host: HTMLElement
   /** Stable per-element id: host swaps must change the render signature. */
   readonly id: number
-  /** Host clips its own overflow: the surface must not lean. */
-  readonly clips: boolean
+  readonly compact: boolean
 }
 
 function first(selector: string): HTMLElement | null {
   const el = document.querySelector(selector)
   return el instanceof HTMLElement ? el : null
+}
+
+function all(selector: string): HTMLElement[] {
+  return [...document.querySelectorAll(selector)].filter((el): el is HTMLElement => el instanceof HTMLElement)
 }
 
 function sessionHeader(): HTMLElement | null {
@@ -91,33 +95,33 @@ function sessionHeader(): HTMLElement | null {
     ?? first('header')
 }
 
-/** The 14 panes, in the same coverage the hand-drawn glass used to have. */
+/** Persistent panes and every live instance of transient panels. */
 const PANE_DEFS: readonly PaneDef[] = [
   { key: 'sidebar', select: () => first('[class*="sidebarCol"]') },
+  { key: 'rightbar', select: () => all('[data-sidebar-right-panel][data-sidebar-right-open="true"]') },
+  { key: 'rail-button', select: () => all('[data-sidebar-collapsed] [data-dsh-sidebar-root] :is(button[class*="toggle"], button[class*="newSession"], button[class*="panelRow"], button[class*="iconButton"], button[class*="searchButton"], button[class*="trigger"][class*="rail"]):not([role="dialog"] *):not([role="menu"] *)') },
   { key: 'new-session', select: () => first('[data-dsh-surface]') },
   { key: 'header', select: sessionHeader },
-  {
-    key: 'composer',
-    select: () => first('[data-dsh-inputbar]:has([data-dsh-stats])') ?? first('[data-composer-card]'),
-  },
-  { key: 'trajectory', select: () => first('[data-dsh-trajectory]') },
-  {
-    key: 'dock',
-    // Fused state: the whole inputbar is the composer pane, so the stats band
-    // must not get a second surface inside it.
-    select: () => {
-      const dock = first('[data-dsh-stats]')
-      return dock !== null && dock.closest('[data-dsh-inputbar]') === null ? dock : null
-    },
-  },
-  { key: 'dialog', select: () => first('[role="dialog"]') },
-  { key: 'todo', select: () => first('[data-testid="todo-panel"]') },
-  { key: 'goal', select: () => first('[data-goal-bar] > *') },
-  { key: 'question', select: () => first('[data-question-key] > section') },
-  { key: 'plan-review', select: () => first('[data-plan-review-key] > section') },
-  { key: 'approval', select: () => first('[data-approval-key] > *') },
-  { key: 'queue', select: () => first('[data-queue-dock] > *') },
-  { key: 'jobs', select: () => first('[data-dsh-jobs]') },
+  { key: 'composer', select: () => first('[data-composer-card]') },
+  { key: 'dialog', select: () => all('[role="dialog"]') },
+  { key: 'menu', select: () => all('[role="menu"]') },
+  { key: 'agent-menu', select: () => all('[class*="menu"]:has(> [role="tree"][class*="menuBody"])') },
+  { key: 'tooltip', select: () => all('[role="tooltip"]') },
+  // Reply actions keep the shared capsule layout but use the reading pad.
+  // Their usage dialog is portaled separately and still resolves above.
+  { key: 'control-group', select: () => all('[data-dsh-nico-control-group]:not([data-clock="end"]):not([data-dsh-inputbar] > [class*="dock"]):not([data-sidebar-collapsed] [data-dsh-sidebar-root] *)') },
+  { key: 'icon-control', select: () => all('[data-dsh-nico-icon-control]:not([data-dsh-nico-control-group] *)') },
+  { key: 'select-trigger', select: () => all('button[aria-haspopup]:not([aria-haspopup="tree"]):not([data-dsh-surface]):not([data-dsh-nico-control-group] *):not([data-dsh-nico-icon-control]), [data-dsh-nico-select-control], [data-dsh-inputbar] > [class*="dock"] button[aria-haspopup]') },
+  // A trigger menu's listbox is its scroll viewport, not a second panel.
+  { key: 'listbox', select: () => all('[role="listbox"]:not(.ngs-surface):not([data-trigger-menu] *)') },
+  { key: 'trigger', select: () => all('[data-trigger-menu]') },
+  { key: 'todo', select: () => all('[data-testid="todo-panel"]') },
+  { key: 'goal', select: () => all('[data-goal-bar] > *') },
+  { key: 'question', select: () => all('[data-question-key] > section') },
+  { key: 'plan-review', select: () => all('[data-plan-review-key] > section') },
+  { key: 'approval', select: () => all('[data-approval-key] > *') },
+  { key: 'queue', select: () => all('[data-queue-dock] > *') },
+  { key: 'jobs', select: () => all('[data-dsh-jobs]') },
 ]
 
 const elementIds = new WeakMap<Element, number>()
@@ -132,42 +136,17 @@ function identityOf(el: Element): number {
   return id
 }
 
-/**
- * Whether the host clips its own overflow. `overflow` is static for these
- * hosts, so the value is cached per element instead of read every sync
- * (getComputedStyle forces a style flush). The cache is dropped on the
- * layout/transition kicks that can flip it (the sidebar's collapse swaps
- * `overflow` between the expanded and the rail state).
- */
-let clipsCache = new WeakMap<Element, boolean>()
-
-function invalidateClips(entries?: readonly ResizeObserverEntry[]): void {
-  if (entries === undefined) {
-    clipsCache = new WeakMap()
-    return
-  }
-  for (const entry of entries) clipsCache.delete(entry.target)
-}
-
-function clipsOverflow(el: HTMLElement): boolean {
-  const cached = clipsCache.get(el)
-  if (cached !== undefined) return cached
-  const style = getComputedStyle(el)
-  const value = style.overflowX !== 'visible' || style.overflowY !== 'visible'
-  clipsCache.set(el, value)
-  return value
-}
-
 const TRANSLATE_PATTERN = /translate3d\(\s*(-?[\d.]+)px,\s*(-?[\d.]+)px/
 const DIALOG_SELECTOR = '[role="dialog"]'
 const CONTENTS = 'contents'
 
 /** Elements we may write a mirrored lean offset onto. */
-function leanTargets(host: HTMLElement, underlay: HTMLElement, containers: Set<Element>): HTMLElement[] {
-  const out: HTMLElement[] = []
+function leanTargets(host: HTMLElement, underlay: HTMLElement, containers: Set<Element>): (HTMLElement | SVGElement)[] {
+  const out: (HTMLElement | SVGElement)[] = []
   const walk = (parent: Element): void => {
     for (const child of parent.children) {
-      if (child === underlay || !(child instanceof HTMLElement)) continue
+      // Icons can be direct SVG children of a button; mirror their offset too.
+      if (child === underlay || !(child instanceof HTMLElement || child instanceof SVGElement)) continue
       // A leaning ancestor would become the containing block of the settings
       // overlay (position: fixed inside the sidebar subtree) and trap it in
       // the column — skip it, and let the stylesheet veto stale offsets.
@@ -191,19 +170,33 @@ interface NicoGlassPaneProps {
 
 /** One glass pane: host underlay, kit surface portal, pointer feed, lean mirror. */
 function NicoGlassPane({ instance, params }: NicoGlassPaneProps) {
-  const { host, clips, key } = instance
-  const strength = clips ? 0 : params.strength
+  const { host, key, compact } = instance
+  const collapsedSidebar = key === 'sidebar' && host.closest('[data-sidebar-collapsed]') !== null
+  // Moving both the underlay and the settings content creates separate
+  // compositor layers inside a clipped dialog, including nested SVG-backed
+  // glass controls. Keep the window's geometry fixed; its controls still
+  // receive the configured elasticity through ControlMaterialContext.
+  const strength = host.matches('[data-shortcut-modal="settings"]')
+    || (collapsedSidebar && host.querySelector(DIALOG_SELECTOR) !== null) ? 0 : params.strength
+  const radius = ['select-trigger', 'control-group', 'icon-control', 'rail-button', 'new-session'].includes(key) ? 999 : compact ? 18 : PANE_RADIUS
+  // File previews need a little more separation from the wallpaper. Keep the
+  // kit's scheme-adaptive neutral tint; only strengthen the rightbar material.
+  const optics = useMemo(() => key === 'rightbar'
+    ? { ...params.optics, tintStrength: 0.35 }
+    : params.optics, [key, params.optics.blur, params.optics.brightness,
+    params.optics.refraction, params.optics.depth, params.optics.curvature, params.optics.dispersion])
   const [underlay, setUnderlay] = useState<HTMLDivElement | null>(null)
 
   // Effect A — inject the underlay as the host's first child and take the
   // host's paint hooks. Every write is reverted on unmount.
-  useEffect(() => {
+  useLayoutEffect(() => {
     const el = document.createElement('div')
     el.setAttribute(SURFACE_ATTRIBUTE, '')
     el.setAttribute('aria-hidden', 'true')
     host.insertBefore(el, host.firstChild)
     host.setAttribute(PANE_ATTRIBUTE, key)
-    host.style.setProperty('--dsh-nico-pane-radius', `${PANE_RADIUS}px`)
+    host.style.setProperty('--dsh-nico-pane-radius', `${radius}px`)
+    host.toggleAttribute('data-dsh-nico-compact', compact)
     const wasPositioned = getComputedStyle(host).position !== 'static'
     if (!wasPositioned) host.style.position = 'relative'
     // React may reconcile the host's children while we are mounted; the
@@ -219,9 +212,41 @@ function NicoGlassPane({ instance, params }: NicoGlassPaneProps) {
       el.remove()
       if (!wasPositioned && host.style.position === 'relative') host.style.removeProperty('position')
       host.removeAttribute(PANE_ATTRIBUTE)
+      host.removeAttribute('data-dsh-nico-compact')
       host.style.removeProperty('--dsh-nico-pane-radius')
     }
-  }, [host, key])
+  }, [host, key, radius, compact])
+
+  useLayoutEffect(() => {
+    if (underlay === null) return
+    return guardLensResize(underlay)
+  }, [underlay])
+
+  // DSH owns the option rows outside the portal. Mirror the kit's actual
+  // selection palette so those rows match GlassSelect without a second tint.
+  useLayoutEffect(() => {
+    if (underlay === null) return
+    const surface = underlay.firstElementChild
+    if (!(surface instanceof HTMLElement)) return
+    const palette = {
+      '--dsh-nico-selection': '--ngs-active-bg',
+      '--dsh-nico-hover': '--ngs-tint-hover',
+      '--dsh-nico-control-text': '--ngs-text',
+      '--dsh-nico-control-muted': '--ngs-text-dim',
+      '--dsh-nico-control-rim': '--ngs-rim-top-soft',
+    }
+    const copy = (): void => {
+      const style = getComputedStyle(surface)
+      for (const [target, source] of Object.entries(palette)) host.style.setProperty(target, style.getPropertyValue(source))
+    }
+    copy()
+    const observer = new MutationObserver(copy)
+    observer.observe(surface, { attributes: true, attributeFilter: ['data-ngs-light'] })
+    return () => {
+      observer.disconnect()
+      for (const target of Object.keys(palette)) host.style.removeProperty(target)
+    }
+  }, [host, underlay, params.overLight])
 
   // Effect B — pointer feed: the underlay is click-transparent, so the host
   // receives the events; the kit's spring listens on the surface container.
@@ -243,7 +268,7 @@ function NicoGlassPane({ instance, params }: NicoGlassPaneProps) {
       // A dialog that contains the host is the pane's own overlay (the dialog
       // pane itself); a dialog inside the host is a floating descendant.
       const dialog = event.target instanceof Element ? event.target.closest(DIALOG_SELECTOR) : null
-      const onPane = onBox && (dialog === null || dialog.contains(host))
+      const onPane = onBox && event.buttons === 0 && (dialog === null || dialog.contains(host))
       surface.dispatchEvent(new PointerEvent(onPane ? event.type : 'pointerleave', {
         bubbles: false,
         cancelable: false,
@@ -270,12 +295,12 @@ function NicoGlassPane({ instance, params }: NicoGlassPaneProps) {
   // pane's shell and mirrored onto the host's content boxes.
   useEffect(() => {
     if (underlay === null || strength <= 0) return
-    let targets: HTMLElement[] | null = null
+    let targets: (HTMLElement | SVGElement)[] | null = null
     const containers = new Set<Element>()
     let lastX = 0
     let lastY = 0
 
-    const collect = (): HTMLElement[] => {
+    const collect = (): (HTMLElement | SVGElement)[] => {
       const next = leanTargets(host, underlay, containers)
       targets = next
       return next
@@ -293,6 +318,14 @@ function NicoGlassPane({ instance, params }: NicoGlassPaneProps) {
     }
 
     const write = (x: number, y: number): void => {
+      // The collapsed rail clips its outgoing expanded content. Move that
+      // clip with the glass instead of sliding the surface inside a fixed mask.
+      // Dialogs disable this motion above so fixed overlays keep their viewport.
+      if (collapsedSidebar) {
+        if (x === 0 && y === 0) host.style.removeProperty('translate')
+        else host.style.translate = `${x.toFixed(2)}px ${y.toFixed(2)}px`
+        return
+      }
       applyToShell(x, y)
       const list = targets ?? collect()
       for (const el of list) {
@@ -341,19 +374,20 @@ function NicoGlassPane({ instance, params }: NicoGlassPaneProps) {
     return () => {
       structure.disconnect()
       motion.disconnect()
+      if (collapsedSidebar) host.style.removeProperty('translate')
       applyToShell(0, 0)
       for (const el of targets ?? []) {
         el.style.removeProperty('translate')
         el.removeAttribute(LEAN_ATTRIBUTE)
       }
     }
-  }, [host, underlay, strength])
+  }, [host, underlay, strength, collapsedSidebar])
 
   if (underlay === null) return null
   return createPortal(
     <GlassSurface
-      cornerRadius={PANE_RADIUS}
-      optics={params.optics}
+      cornerRadius={radius}
+      optics={optics}
       elasticity={strength}
       highlightIntensity={params.highlight}
     />,
@@ -401,7 +435,7 @@ export function startGlassPanes(getParams: () => GlassPaneParams): () => void {
   let settle = 0
   const observed = new Set<Element>()
   const resizeObserver = typeof ResizeObserver === 'function'
-    ? new ResizeObserver((entries) => { invalidateClips(entries); schedule() })
+    ? new ResizeObserver(schedule)
     : null
 
   const keyOf = (value: GlassPaneParams): string => {
@@ -411,23 +445,30 @@ export function startGlassPanes(getParams: () => GlassPaneParams): () => void {
   }
 
   const render = (): void => {
-    reactRoot.render(
+    // Commit discovery and underlay insertion in this frame, before paint;
+    // passive effects used to add another bare frame to short-lived popups.
+    flushSync(() => reactRoot.render(
       <GlassProvider quality="high" overLight={params.overLight} lensMapRasterScale={LENS_MAP_RASTER_SCALE}>
         {instances.map(instance => (
-          <NicoGlassPane key={instance.key} instance={instance} params={params} />
+          <NicoGlassPane key={`${instance.key}:${instance.id}`} instance={instance} params={params} />
         ))}
       </GlassProvider>,
-    )
+    ))
   }
 
   const resolve = (): PaneInstance[] => {
     const out: PaneInstance[] = []
     const seen = new Set<HTMLElement>()
     for (const def of PANE_DEFS) {
-      const host = def.select()
-      if (host === null || seen.has(host)) continue
-      seen.add(host)
-      out.push({ key: def.key, host, id: identityOf(host), clips: clipsOverflow(host) })
+      const selected = def.select()
+      const hosts = selected === null ? [] : selected instanceof HTMLElement ? [selected] : selected
+      for (const host of hosts) {
+        if (seen.has(host) || host.closest(`[${HOST_ATTRIBUTE}], [${SURFACE_ATTRIBUTE}]`) !== null) continue
+        seen.add(host)
+        const compact = ['menu', 'agent-menu', 'listbox', 'trigger', 'jobs', 'tooltip', 'select-trigger', 'control-group', 'icon-control', 'rail-button'].includes(def.key)
+          || (def.key === 'dialog' && host.getAttribute('aria-modal') !== 'true')
+        out.push({ key: def.key, host, id: identityOf(host), compact })
+      }
     }
     return out
   }
@@ -435,12 +476,13 @@ export function startGlassPanes(getParams: () => GlassPaneParams): () => void {
   const sync = (): void => {
     if (disposed) return
     const nextParams = getParams()
-    if (nextParams !== params) {
+    const nextParamsKey = keyOf(nextParams)
+    if (nextParamsKey !== paramsKey) {
       params = nextParams
-      paramsKey = keyOf(nextParams)
+      paramsKey = nextParamsKey
     }
     const next = params.mica ? resolve() : []
-    const nextSignature = next.map(i => `${i.key}:${i.id}:${i.clips ? 1 : 0}`).join('|') + `#${paramsKey}`
+    const nextSignature = next.map(i => `${i.key}:${i.id}:${i.compact ? 1 : 0}`).join('|') + `#${paramsKey}`
     if (nextSignature === signature) return
     signature = nextSignature
     instances = next
@@ -464,6 +506,11 @@ export function startGlassPanes(getParams: () => GlassPaneParams): () => void {
       observed.add(el)
       resizeObserver.observe(el)
     }
+    for (const el of observed) {
+      if (el.isConnected) continue
+      resizeObserver.unobserve(el)
+      observed.delete(el)
+    }
   }
 
   function tick(): void {
@@ -481,11 +528,16 @@ export function startGlassPanes(getParams: () => GlassPaneParams): () => void {
     frame = window.requestAnimationFrame(tick)
   }
 
-  const rootNode = document.getElementById('root')
-  const mutations = new MutationObserver(() => { schedule() })
-  if (rootNode !== null) mutations.observe(rootNode, { childList: true, subtree: true })
-  const onResize = (): void => { invalidateClips(); schedule() }
-  const onTransitionEnd = (): void => { invalidateClips(); schedule() }
+  // DSH 0.1.7 portals settings and other overlays beside #root. Watch the
+  // body so those panes are discovered too, excluding kit-owned subtrees:
+  // filter-registry and surface updates cannot change the host pane set.
+  const mutations = new MutationObserver((records) => {
+    if (records.some(record => !(record.target instanceof Element)
+      || record.target.closest(`[${HOST_ATTRIBUTE}], [${SURFACE_ATTRIBUTE}]`) === null)) schedule()
+  })
+  mutations.observe(document.body, { childList: true, subtree: true })
+  const onResize = (): void => { schedule() }
+  const onTransitionEnd = (): void => { schedule() }
   window.addEventListener('resize', onResize)
   document.addEventListener('transitionend', onTransitionEnd, true)
 
@@ -515,11 +567,12 @@ export function startGlassPanes(getParams: () => GlassPaneParams): () => void {
 function sweepPaneResidue(): void {
   for (const el of document.querySelectorAll(`[${PANE_ATTRIBUTE}]`)) {
     el.removeAttribute(PANE_ATTRIBUTE)
+    el.removeAttribute('data-dsh-nico-compact')
     if (el instanceof HTMLElement) el.style.removeProperty('--dsh-nico-pane-radius')
   }
   for (const el of document.querySelectorAll(`[${SURFACE_ATTRIBUTE}]`)) el.remove()
   for (const el of document.querySelectorAll(`[${LEAN_ATTRIBUTE}]`)) {
     el.removeAttribute(LEAN_ATTRIBUTE)
-    if (el instanceof HTMLElement) el.style.removeProperty('translate')
+    if (el instanceof HTMLElement || el instanceof SVGElement) el.style.removeProperty('translate')
   }
 }

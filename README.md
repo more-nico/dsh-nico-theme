@@ -1,6 +1,6 @@
 # dsh-nico-theme
 
-[![npm version](https://img.shields.io/npm/v/dsh-nico-theme?style=flat-square&color=cb3837)](https://www.npmjs.com/package/dsh-nico-theme) [![license: MIT](https://img.shields.io/badge/license-MIT-22c55e?style=flat-square)](LICENSE) [![dsh >= 0.1.2-rc.1](https://img.shields.io/badge/dsh-%3E%3D0.1.2--rc.1-61DAFB?style=flat-square)](https://www.npmjs.com/package/@deepseek-ai/dsh) [![glass by nico-glass-kit](https://img.shields.io/badge/glass-nico--glass--kit-cb3837?style=flat-square)](https://github.com/more-nico/nico-glass-kit)
+[![npm version](https://img.shields.io/npm/v/dsh-nico-theme?style=flat-square&color=cb3837)](https://www.npmjs.com/package/dsh-nico-theme) [![license: MIT](https://img.shields.io/badge/license-MIT-22c55e?style=flat-square)](LICENSE) [![dsh >= 0.1.7-rc.2](https://img.shields.io/badge/dsh-%3E%3D0.1.7--rc.2-61DAFB?style=flat-square)](https://www.npmjs.com/package/@deepseek-ai/dsh) [![glass by nico-glass-kit](https://img.shields.io/badge/glass-nico--glass--kit-cb3837?style=flat-square)](https://github.com/more-nico/nico-glass-kit)
 
 English | [中文](README.zh.md) · [Changelog](CHANGELOG.md)
 
@@ -31,12 +31,13 @@ A DSH client plugin. The panel glass is rendered by [nico-glass-kit](https://git
 
 ## Highlights
 
-- **Mica** floating glass panels (32px corners, nico-glass-kit material), or **compat** mode (stock layout, frosted material)
-- 14 panes covered: header, sidebar, composer, docks, dialogs, background-task popover, new-session capsule
+- **Mica** floating glass panels (32px main-panel corners, 18px popup corners, nico-glass-kit material), or **compat** mode (stock layout, frosted material)
+- Panes cover the header, sidebar, composer, docks, dialogs, menus, model lists, background-task popover and new-session capsule, including multiple transient panels of the same kind
+- Popups start with configured frosting before refraction becomes ready; panes share the material settings, with a stronger neutral tint on the right sidebar for file previews. Selected rows, header tabs and small buttons use rounded outlines and subtle highlights
 - Fluid backdrop with hue / depth knobs; optional image or video wallpaper with its own blur slider
 - Material knobs on the kit scale: blur, brightness, refraction, depth, curvature, dispersion, rim highlight
-- Hover **elasticity**: the glass and the panel content lean together under the pointer; hosts that clip their own overflow keep the glass rigid, and `prefers-reduced-motion` turns it off
-- Conversation reading pads (user bubbles and assistant prose only)
+- Hover **elasticity**: the glass, icons and panel content lean together using the shared setting; the settings window stays stationary, and `prefers-reduced-motion` turns motion off
+- Reading pads for user bubbles, assistant prose, reply actions and the trajectory
 - No adaptive text color
 
 ## Gallery
@@ -62,13 +63,13 @@ A DSH client plugin. The panel glass is rendered by [nico-glass-kit](https://git
 
 ## Origins
 
-This repository is a **fork** of [WYH66666666/DSH-Transparent-UI-Plugin](https://github.com/WYH66666666/DSH-Transparent-UI-Plugin) (MIT, © 2026 John Wu), adapted for **DSH 0.1.2-rc.1**.
+This repository is a **fork** of [WYH66666666/DSH-Transparent-UI-Plugin](https://github.com/WYH66666666/DSH-Transparent-UI-Plugin) (MIT, © 2026 John Wu), adapted for **DSH 0.1.7-rc.2**.
 
-The panel glass — refraction, bevel, tint, rim light, and elasticity — is rendered by [nico-glass-kit](https://github.com/more-nico/nico-glass-kit) (`^0.3.0`, MIT). The fluid backdrop, wallpaper layers, and reading pads are this repository's own CSS/canvas work.
+The panel glass — refraction, bevel, tint, rim light, and elasticity — is rendered by [nico-glass-kit](https://github.com/more-nico/nico-glass-kit) (`0.3.2`, MIT). The fluid backdrop, wallpaper layers, and reading pads are this repository's own CSS/canvas work.
 
 ## Requirements
 
-- `@deepseek-ai/dsh@0.1.2-rc.1` (or newer in the 0.1.2 line)
+- `@deepseek-ai/dsh@0.1.7-rc.2` (tested version)
 - Node.js 22+
 - The refraction pass wants a Chromium browser; Firefox and Safari fall back to the kit's plain CSS frost on their own
 
@@ -82,7 +83,7 @@ DSH plugins live on a **profile**, not in the global `dsh` install. `dsh plugin 
 dsh plugin --profile web add dsh-nico-theme@latest
 ```
 
-Then restart `dsh web`. Enable **Nico glass theme** in Settings → Plugins. Every knob lives on the dedicated **Nico Theme** page in the settings left nav.
+Then restart `dsh web`. Enable **Nico glass theme** in Settings → Built-in Plugins → Nico Theme. Every knob lives on the dedicated **Nico Theme** page in the settings left nav.
 
 ### Throwaway profile (does not touch `web`)
 

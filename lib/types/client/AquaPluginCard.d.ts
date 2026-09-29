@@ -6,7 +6,7 @@ export interface AquaPluginCardInjected {
     setEnabled: (enabled: boolean) => void;
 }
 /** Full component props: runtime share + store share + locale seat + injected face. */
-export type AquaPluginCardComponentProps = PropsRuntime<'settings.plugin.item'> & PropsStore<ReturnType<typeof createAquaRowStore>> & PropsLocale<'settings.nico'> & InjectFace<AquaPluginCardInjected>;
+export type AquaPluginCardComponentProps = PropsRuntime<'settings.plugins.tab'> & PropsStore<ReturnType<typeof createAquaRowStore>> & PropsLocale<'settings.nico'> & InjectFace<AquaPluginCardInjected>;
 /**
  * Render the Aqua plugin card.
  * @param props - composed slot props.

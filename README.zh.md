@@ -1,6 +1,6 @@
 # dsh-nico-theme
 
-[![npm version](https://img.shields.io/npm/v/dsh-nico-theme?style=flat-square&color=cb3837)](https://www.npmjs.com/package/dsh-nico-theme) [![license: MIT](https://img.shields.io/badge/license-MIT-22c55e?style=flat-square)](LICENSE) [![dsh >= 0.1.2-rc.1](https://img.shields.io/badge/dsh-%3E%3D0.1.2--rc.1-61DAFB?style=flat-square)](https://www.npmjs.com/package/@deepseek-ai/dsh) [![glass by nico-glass-kit](https://img.shields.io/badge/glass-nico--glass--kit-cb3837?style=flat-square)](https://github.com/more-nico/nico-glass-kit)
+[![npm version](https://img.shields.io/npm/v/dsh-nico-theme?style=flat-square&color=cb3837)](https://www.npmjs.com/package/dsh-nico-theme) [![license: MIT](https://img.shields.io/badge/license-MIT-22c55e?style=flat-square)](LICENSE) [![dsh >= 0.1.7-rc.2](https://img.shields.io/badge/dsh-%3E%3D0.1.7--rc.2-61DAFB?style=flat-square)](https://www.npmjs.com/package/@deepseek-ai/dsh) [![glass by nico-glass-kit](https://img.shields.io/badge/glass-nico--glass--kit-cb3837?style=flat-square)](https://github.com/more-nico/nico-glass-kit)
 
 [English](README.md) | 中文 · [更新日志](CHANGELOG.md)
 
@@ -31,12 +31,13 @@
 
 ## 亮点
 
-- **云母** 浮动玻璃面板（统一 32px 圆角，nico-glass-kit 材质），或 **兼容** 模式（原生布局 + 磨砂材质）
-- 14 个面板全部铺上：顶栏 / 侧栏 / 发送框 / 各 dock / 弹窗 / 后台任务 popover / 新建会话胶囊
+- **云母** 浮动玻璃面板（大面板 32px、小弹层 18px 圆角，nico-glass-kit 材质），或 **兼容** 模式（原生布局 + 磨砂材质）
+- 顶栏 / 侧栏 / 发送框 / 各 dock / 弹窗 / 菜单 / 模型列表 / 后台任务 popover / 新建会话胶囊；同类小面板支持同时出现多个
+- 小弹层先显示按设置绘制的磨砂，再补上折射；面板共用材质配置，右侧栏增加中性着色以提高文件预览可读性。侧栏选中项、顶栏标签和小按钮使用胶囊轮廓与细高光
 - 流体背景（色调 / 深浅可调）；可选图片或视频壁纸，壁纸自带模糊滑杆
 - 按 kit 刻度调节材质：模糊度、亮度、折射强度、折射深度、边缘曲率、边缘色散、边缘高光
-- 悬停 **弹性**：玻璃与面板内容一起倾斜；自己裁剪溢出的宿主保持刚性，`prefers-reduced-motion` 下整体停用
-- 会话阅读垫层（只垫用户气泡和 AI 主正文）
+- 悬停 **弹性**：玻璃、图标与面板内容一起倾斜，共用设置强度；设置窗口保持固定，`prefers-reduced-motion` 下停用动画
+- 阅读垫层覆盖用户气泡、AI 主正文、回复操作栏和轨迹内容
 - 不含自适应字色
 
 ## 图示
@@ -62,13 +63,13 @@
 
 ## 来源
 
-本仓库是 [WYH66666666/DSH-Transparent-UI-Plugin](https://github.com/WYH66666666/DSH-Transparent-UI-Plugin) 的 **fork**（MIT，© 2026 John Wu），适配 **DSH 0.1.2-rc.1**。
+本仓库是 [WYH66666666/DSH-Transparent-UI-Plugin](https://github.com/WYH66666666/DSH-Transparent-UI-Plugin) 的 **fork**（MIT，© 2026 John Wu），适配 **DSH 0.1.7-rc.2**。
 
-面板玻璃（折射、倒角、着色、边缘高光、弹性）由 [nico-glass-kit](https://github.com/more-nico/nico-glass-kit)（`^0.3.0`，MIT）渲染；流体背景、壁纸层与会话垫层是本仓库自己的 CSS / canvas 实现。
+面板玻璃（折射、倒角、着色、边缘高光、弹性）由 [nico-glass-kit](https://github.com/more-nico/nico-glass-kit)（`0.3.2`，MIT）渲染；流体背景、壁纸层与会话垫层是本仓库自己的 CSS / canvas 实现。
 
 ## 环境
 
-- `@deepseek-ai/dsh@0.1.2-rc.1`（或 0.1.2 更新的 rc）
+- `@deepseek-ai/dsh@0.1.7-rc.2`（本轮实测版本）
 - Node.js 22+
 - 折射需要 Chromium 系浏览器；Firefox 和 Safari 自动退回 kit 的普通 CSS 磨砂
 
@@ -82,7 +83,7 @@ DSH 插件装在 **profile** 里，不是全局 `dsh`。`dsh plugin add` 会在�
 dsh plugin --profile web add dsh-nico-theme@latest
 ```
 
-然后重启 `dsh web`。在 **设置 → 插件** 打开 **Nico 玻璃主题**。所有旋钮都在设置左侧导航的 **Nico 主题** 独立页。
+然后重启 `dsh web`。在 **设置 → 内置插件 → Nico 主题** 打开 **Nico 玻璃主题**。所有旋钮都在设置左侧导航的 **Nico 主题** 独立页。
 
 ### 单独试、不动日常 `web`
 

@@ -339,12 +339,14 @@ export function attachFluidShader(canvas: HTMLCanvasElement, params: FluidParams
   let current: FluidParams = { ...params }
   const pointer = { x: 0.5, y: 0.5, smoothX: 0.5, smoothY: 0.5, vx: 0, vy: 0, svx: 0, svy: 0 }
   const dprCap = Math.min(window.devicePixelRatio || 1, 1.5)
-  width = Math.round(canvas.clientWidth * dprCap)
-  height = Math.round(canvas.clientHeight * dprCap)
+  // Wallpaper mode hides this canvas at startup. Seed valid viewport-sized
+  // targets so returning to fluid mode never samples a zero-sized texture.
+  width = Math.max(1, Math.round((canvas.clientWidth || window.innerWidth) * dprCap))
+  height = Math.max(1, Math.round((canvas.clientHeight || window.innerHeight) * dprCap))
   canvas.width = width
   canvas.height = height
-  flowWidth = Math.round(width / 4)
-  flowHeight = Math.round(height / 4)
+  flowWidth = Math.max(1, Math.round(width / 4))
+  flowHeight = Math.max(1, Math.round(height / 4))
 
   const initial = new Uint8Array(flowWidth * flowHeight * 4)
   for (let i = 0; i < flowWidth * flowHeight; i += 1) {
@@ -382,6 +384,7 @@ export function attachFluidShader(canvas: HTMLCanvasElement, params: FluidParams
     const ratio = Math.min(window.devicePixelRatio || 1, 1.5)
     const nextWidth = Math.round(canvas.clientWidth * ratio)
     const nextHeight = Math.round(canvas.clientHeight * ratio)
+    if (nextWidth === 0 || nextHeight === 0) return
     if (nextWidth !== width || nextHeight !== height) {
       width = nextWidth
       height = nextHeight

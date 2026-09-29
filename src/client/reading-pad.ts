@@ -1,6 +1,7 @@
 /**
  * Conversation reading pads: frost plates on user bubbles and assistant
- * prose only. Think/tool cards stay clear until expanded. Hero has none.
+ * prose, reply action rows and the trajectory. Think/tool cards stay clear until expanded.
+ * Hero has none.
  * Ported from more-nico/dshLiquidTheme markReadingPads (no adaptive ink).
  */
 
@@ -73,6 +74,10 @@ export function markReadingPads(): void {
   }
   document.documentElement.removeAttribute('data-dsh-nico-home')
 
+  for (const trajectory of document.querySelectorAll('[data-conversation-composer-overlay]')) {
+    trajectory.setAttribute(PAD_ATTR, 'trajectory')
+  }
+
   for (const row of document.querySelectorAll(
     '[data-chat-flow-kind="user"], [data-chat-flow-kind="steering"]',
   )) {
@@ -102,6 +107,12 @@ export function markReadingPads(): void {
     if (!isDisclosureOpen(card)) continue
     const expanded = findExpandedPad(card)
     if (expanded !== undefined && expanded !== card) expanded.setAttribute(PAD_ATTR, 'expand')
+  }
+
+  // The reply footer is a quiet reading pad. Usage details open in a separate
+  // dialog, whose material continues to be owned by the glass pane layer.
+  for (const actions of document.querySelectorAll('[data-conversation-scroll] [data-clock="end"]')) {
+    actions.setAttribute(PAD_ATTR, 'actions')
   }
 
   wrapWideTables()

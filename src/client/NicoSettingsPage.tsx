@@ -7,13 +7,13 @@
  * writes go through the same {@link AquaLayer} paths, so the Plugins card and
  * this page stay in sync.
  */
-import { useRef } from 'react'
-import { IconCodeOutline16, IconEnhanceOutline16 } from '@deepseek-ai/dsh-client-ui-primitives'
+import { useMemo, useRef } from 'react'
+import { IconCodeOutlineRegular, IconEnhanceOutlineRegular } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { PropsLocale, PropsRuntime, PropsStore } from '@deepseek-ai/dsh-client-ui-slots'
 import { GlassProvider } from 'nico-glass-kit'
 // Type-only: pulls the `settings.section` SlotMap merge.
 import type {} from '@deepseek-ai/dsh-client-ui-settings/client'
-import { fileToDataUrl, Knob, PickButton, Segmented, Toggle } from './AquaControls.tsx'
+import { ControlMaterialContext, fileToDataUrl, Knob, PickButton, Segmented, Toggle } from './AquaControls.tsx'
 import { loadVideoHandle, saveVideoBlob, saveVideoHandle } from './wallpaper-store.ts'
 import type { createAquaRowStore } from './settings-store.ts'
 import css from './NicoSettingsPage.module.css'
@@ -150,9 +150,19 @@ export function NicoSettingsPage(props: NicoSettingsPageComponentProps) {
   const bgMin = dark ? 0 : 50
   const bgMax = dark ? 50 : 100
   const bgDisplay = Math.min(bgMax, Math.max(bgMin, bgBrightness))
+  const optics = useMemo(() => ({
+    blur, brightness, refraction: refraction / 100, depth, curvature, dispersion: dispersion / 100,
+  }), [blur, brightness, refraction, depth, curvature, dispersion])
+  const material = useMemo(() => ({
+    optics,
+    elasticity: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : (elasticity ? elasticityStrength : 0),
+    highlightIntensity: highlight,
+    hoverBrightnessBoost: 0,
+  }), [optics, elasticity, elasticityStrength, highlight])
 
   return (
     <GlassProvider quality="high" overLight={!dark}>
+      <ControlMaterialContext.Provider value={material}>
       <div className={css.page} data-dsh-nico-page>
         <div className={css.header}>
           <div className={css.headerText}>
@@ -184,8 +194,8 @@ export function NicoSettingsPage(props: NicoSettingsPageComponentProps) {
                     value={mode}
                     variant="cards"
                     options={[
-                      { id: 'mica', label: t('aqua.modeMica'), visual: <IconEnhanceOutline16 />, visualClass: rowCss.cardVisual },
-                      { id: 'compat', label: t('aqua.modeCompat'), visual: <IconCodeOutline16 />, visualClass: rowCss.cardVisual },
+                      { id: 'mica', label: t('aqua.modeMica'), visual: <IconEnhanceOutlineRegular />, visualClass: rowCss.cardVisual },
+                      { id: 'compat', label: t('aqua.modeCompat'), visual: <IconCodeOutlineRegular />, visualClass: rowCss.cardVisual },
                     ]}
                     onSelect={setMode}
                   />
@@ -353,6 +363,7 @@ export function NicoSettingsPage(props: NicoSettingsPageComponentProps) {
           </div>
         </div>
       </div>
+      </ControlMaterialContext.Provider>
     </GlassProvider>
   )
 }

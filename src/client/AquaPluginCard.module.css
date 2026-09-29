@@ -1,6 +1,5 @@
-/* Aqua plugin card: one list item in the Plugins configurable tab — the
- * section's card language (rounded border, hairline, layer bg) holding only
- * the master switch. All knobs moved to the General settings' Appearance row. */
+/* Nico's Plugins tab holds the browser-local master switch; all material
+ * and backdrop controls live on the dedicated Nico settings page. */
 
 .card {
   display: flex;

@@ -1,6 +1,7 @@
 /**
  * Conversation reading pads: frost plates on user bubbles and assistant
- * prose only. Think/tool cards stay clear until expanded. Hero has none.
+ * prose, reply action rows and the trajectory. Think/tool cards stay clear until expanded.
+ * Hero has none.
  * Ported from more-nico/dshLiquidTheme markReadingPads (no adaptive ink).
  */
 export declare const PAD_ATTR = "data-dsh-nico-pad";

@@ -1,7 +1,6 @@
 /**
- * Dark-mode fluid screenshots for README (assets/).
- * Uses the isolated nico-theme-test UI. Does not click Appearance,
- * so it never writes the daily ~/.dsh/settings.yaml.
+ * Starry Night screenshots for README (assets/).
+ * Uses an isolated DSH profile and never opens an existing conversation.
  */
 import { chromium } from 'playwright'
 import { mkdir, readFile, rm } from 'node:fs/promises'
@@ -51,14 +50,28 @@ async function openWorkspace(page) {
   }
 }
 
+async function dismissFirstRun(page) {
+  // Fresh profiles can show the beta notice and API-key setup dialog.
+  // Continue without configuring credentials so screenshots stay private.
+  for (let i = 0; i < 6; i += 1) {
+    const dialog = page.locator('[role="dialog"]').filter({ visible: true }).first()
+    if (!(await dialog.count())) return
+    const continueButton = dialog.getByRole('button', { name: /^(继续|稍后配置|跳过)$/ }).first()
+    if (!(await continueButton.count())) return
+    await continueButton.click()
+    await page.waitForTimeout(500)
+  }
+}
+
 const browser = await chromium.launch({ headless: true })
-const page = await browser.newPage({ viewport: VIEWPORT })
+const page = await browser.newPage({ viewport: VIEWPORT, colorScheme: 'dark' })
 
 try {
   await mkdir(OUT, { recursive: true })
   await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 60_000 })
   await waitForShell(page)
   await darkFluid(page)
+  await dismissFirstRun(page)
   await openWorkspace(page)
 
   await page.locator('[role="treeitem"]').filter({ hasText: /^新会话$/ }).first().click()
@@ -68,17 +81,19 @@ try {
   await page.screenshot({ path: join(OUT, 'hero-dark.png'), fullPage: false })
   console.log('wrote assets/hero-dark.png')
 
-  const session = page.locator('[role="treeitem"]').filter({ hasText: /分钟|小时|天/ }).first()
-  if (await session.count()) {
-    await session.click()
-    await page.waitForTimeout(2200)
-  }
+  // Keep the second shot on the theme settings view. Never select a session
+  // from history, which could expose private conversation content.
+  await page.getByRole('button', { name: '设置' }).click()
+  await page.getByText('Nico 主题', { exact: true }).click()
+  await page.waitForTimeout(1200)
   await page.mouse.move(900, 420)
   await page.evaluate(() => document.body?.setAttribute('data-ds-dark-theme', ''))
   await page.waitForTimeout(700)
   await page.screenshot({ path: join(OUT, 'chat-dark.png'), fullPage: false })
-  console.log('wrote assets/chat-dark.png')
+  console.log('wrote assets/chat-dark.png (Nico theme settings; no conversation history)')
 
+  await page.keyboard.press('Escape')
+  await page.waitForTimeout(500)
   const collapse = page.locator(
     'button[aria-label*="侧"], button[aria-label*="栏"], button[aria-label*="bar"], button[aria-label*="Collapse"], button[aria-label*="收起"]',
   ).first()

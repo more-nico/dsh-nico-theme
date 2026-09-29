@@ -48,10 +48,10 @@ A DSH client plugin. The panel glass is rendered by [nico-glass-kit](https://git
   <img src="assets/hero-dark.png" alt="Home screen in dark mode, fluid backdrop and glass composer" width="100%">
 </p>
 
-**Conversation and rail** — glass header, todo dock, and reading pads over the fluid backdrop.
+**Theme settings and rail** — glass controls and the collapsed sidebar over Starry Night.
 
 <p>
-  <img src="assets/chat-dark.png" alt="Conversation in dark mode, glass header, todo dock, and reading pads" width="49%">
+  <img src="assets/chat-dark.png" alt="Nico Theme glass and Starry Night wallpaper settings" width="49%">
   <img src="assets/rail-dark.png" alt="Collapsed sidebar rail over the dark fluid backdrop" width="49%">
 </p>
 

@@ -42,17 +42,17 @@ A DSH client plugin. The panel glass is rendered by [nico-glass-kit](https://git
 
 ## Gallery
 
-**Start screen** — fluid backdrop under the glass composer.
+**Mock conversation** — a successful, synthetic art-history exchange over the dark glass UI.
 
 <p>
-  <img src="assets/hero-dark.png" alt="Home screen in dark mode, fluid backdrop and glass composer" width="100%">
+  <img src="assets/hero-dark.png" alt="Dark-mode mock conversation about Monet's Cliff Walk at Pourville" width="100%">
 </p>
 
-**Theme settings and rail** — glass controls and the collapsed sidebar over Starry Night.
+**Theme settings and rail** — glass controls and the collapsed sidebar over Monet's *Cliff Walk at Pourville*.
 
 <p>
-  <img src="assets/chat-dark.png" alt="Nico Theme glass and Starry Night wallpaper settings" width="49%">
-  <img src="assets/rail-dark.png" alt="Collapsed sidebar rail over the dark fluid backdrop" width="49%">
+  <img src="assets/chat-dark.png" alt="Nico Theme settings over Cliff Walk at Pourville" width="49%">
+  <img src="assets/rail-dark.png" alt="Collapsed sidebar rail over Cliff Walk at Pourville" width="49%">
 </p>
 
 **Settings** — the Nico Theme page carries every material knob; the clip drags the wallpaper blur to 3px.
@@ -108,7 +108,7 @@ pnpm install
 pnpm bundle          # tsdown + lib/types/*.d.ts
 pnpm typecheck       # tsc --noEmit against the installed DSH client packages
 pnpm visual          # Playwright checks against the test profile
-pnpm readme-shots    # refresh the dark-fluid images in assets/
+pnpm readme-shots    # refresh dark-mode images (set NICO_WALLPAPER; optional NICO_THEME_DEMO_TITLE selects one named local demo session)
 pnpm readme-gifs     # record assets/*.gif (needs NICO_THEME_URL; settings clip also needs NICO_WALLPAPER)
 ```
 
@@ -123,4 +123,4 @@ Maintainers: `npm login`, then `git tag v0.1.0 && git push origin v0.1.0`. GitHu
 - Fork of [DSH-Transparent-UI-Plugin](https://github.com/WYH66666666/DSH-Transparent-UI-Plugin) (MIT)
 - Glass material from [nico-glass-kit](https://github.com/more-nico/nico-glass-kit) (MIT)
 
-Screenshots and clips in `assets/` were recorded on a local test profile over Vincent van Gogh's *The Starry Night* (1889, public domain).
+The still PNG screenshots in `assets/` were captured in dark mode on an isolated local test profile over Claude Monet's *Cliff Walk at Pourville* (1882). The Art Institute rights record is listed as CC0 by [Open Museum](https://open-museum.art/art/aic:14620); this [Wikimedia Commons reproduction](https://commons.wikimedia.org/wiki/File:Claude_Monet_-_Cliff_Walk_at_Pourville_-_Google_Art_Project.jpg) is marked Public Domain. The conversation screenshot uses a canned response from a local-only mock endpoint; it contains no real account or conversation data.

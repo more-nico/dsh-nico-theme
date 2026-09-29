@@ -42,17 +42,17 @@
 
 ## 图示
 
-**起始页** — 玻璃发送框浮在流体背景上。
+**Mock 会话** — 深色玻璃界面上的一段合成艺术史对话。
 
 <p>
-  <img src="assets/hero-dark.png" alt="深色模式起始页：流体背景与玻璃发送框" width="100%">
+  <img src="assets/hero-dark.png" alt="深色模式 mock 会话：讨论莫奈《悬崖漫步》" width="100%">
 </p>
 
-**会话与收起侧栏** — 玻璃顶栏、待办条与阅读垫层，底下是流体背景。
+**主题设置与收起侧栏** — 玻璃控件与收起后的侧栏，背景为莫奈《悬崖漫步》。
 
 <p>
-  <img src="assets/chat-dark.png" alt="深色模式会话：玻璃顶栏、待办条与阅读垫层" width="49%">
-  <img src="assets/rail-dark.png" alt="深色模式收起侧栏，流体铺满主栏" width="49%">
+  <img src="assets/chat-dark.png" alt="莫奈《悬崖漫步》壁纸上的 Nico 主题设置" width="49%">
+  <img src="assets/rail-dark.png" alt="莫奈《悬崖漫步》壁纸上的收起侧栏" width="49%">
 </p>
 
 **设置页** — Nico 主题页集中所有材质旋钮；片段里把壁纸模糊度拖到 3px。
@@ -108,7 +108,7 @@ pnpm install
 pnpm bundle          # tsdown + lib/types/*.d.ts
 pnpm typecheck       # 用已安装的 DSH client 包跑 tsc --noEmit
 pnpm visual          # 对测试 profile 跑 Playwright
-pnpm readme-shots    # 刷新 assets/ 里的深色流体截图
+pnpm readme-shots    # 刷新深色截图（设置 NICO_WALLPAPER；可用 NICO_THEME_DEMO_TITLE 指定本地演示会话）
 pnpm readme-gifs     # 录制 assets/*.gif（需 NICO_THEME_URL；设置页那段还需 NICO_WALLPAPER）
 ```
 
@@ -123,4 +123,4 @@ pnpm readme-gifs     # 录制 assets/*.gif（需 NICO_THEME_URL；设置页那�
 - Fork 自 [DSH-Transparent-UI-Plugin](https://github.com/WYH66666666/DSH-Transparent-UI-Plugin)（MIT）
 - 玻璃材质来自 [nico-glass-kit](https://github.com/more-nico/nico-glass-kit)（MIT）
 
-`assets/` 里的截图与动图在本地测试 profile 上录制，背景为梵高《星月夜》（1889，公有领域）。
+`assets/` 里的静态 PNG 截图以深色模式在隔离的本地测试 profile 上录制，背景为莫奈《悬崖漫步》（1882）。[Open Museum 的权利记录](https://open-museum.art/art/aic:14620)将芝加哥艺术博物馆藏品标为 CC0；使用的 [Wikimedia Commons 图像副本](https://commons.wikimedia.org/wiki/File:Claude_Monet_-_Cliff_Walk_at_Pourville_-_Google_Art_Project.jpg)标记为公有领域。会话截图由本地 mock 端点返回固定演示回答，不含真实账号或会话数据。

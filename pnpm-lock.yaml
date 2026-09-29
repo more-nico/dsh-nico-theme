@@ -7,13 +7,6 @@ settings:
 importers:
 
   .:
-    dependencies:
-      '@deepseek-ai/dsh-settings':
-        specifier: ^0.1.7-rc.2 || ^0.2.0-rc.2
-        version: 0.2.0-rc.2(cf472db12c7a30b750f93070b7128298)
-      '@deepseek-ai/schemastery':
-        specifier: ~3.18.4
-        version: 3.18.4
     devDependencies:
       '@deepseek-ai/cordis':
         specifier: ~4.0.4
@@ -45,6 +38,12 @@ importers:
       '@deepseek-ai/dsh-invariants':
         specifier: ^0.2.0-rc.2
         version: 0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)
+      '@deepseek-ai/dsh-settings':
+        specifier: ^0.2.0-rc.2
+        version: 0.2.0-rc.2(cf472db12c7a30b750f93070b7128298)
+      '@deepseek-ai/schemastery':
+        specifier: ~3.18.4
+        version: 3.18.4
       '@types/react':
         specifier: ~18.3.1
         version: 18.3.31

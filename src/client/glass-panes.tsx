@@ -90,9 +90,7 @@ function all(selector: string): HTMLElement[] {
 
 function sessionHeader(): HTMLElement | null {
   return first('[data-phase="active"] header')
-    ?? first('[data-dsh-float] header:not([class*="headerHidden"])')
-    ?? first('[data-dsh-float] header')
-    ?? first('header')
+    ?? first('header:not([data-phase="hero"] header):not([data-phase="settling"] header):not([class*="headerHidden"])')
 }
 
 /** Persistent panes and every live instance of transient panels. */
@@ -234,6 +232,7 @@ function NicoGlassPane({ instance, params }: NicoGlassPaneProps) {
       '--dsh-nico-control-text': '--ngs-text',
       '--dsh-nico-control-muted': '--ngs-text-dim',
       '--dsh-nico-control-rim': '--ngs-rim-top-soft',
+      '--dsh-nico-control-rim-bottom': '--ngs-rim-bottom',
     }
     const copy = (): void => {
       const style = getComputedStyle(surface)
@@ -535,7 +534,12 @@ export function startGlassPanes(getParams: () => GlassPaneParams): () => void {
     if (records.some(record => !(record.target instanceof Element)
       || record.target.closest(`[${HOST_ATTRIBUTE}], [${SURFACE_ATTRIBUTE}]`) === null)) schedule()
   })
-  mutations.observe(document.body, { childList: true, subtree: true })
+  mutations.observe(document.body, {
+    childList: true,
+    subtree: true,
+    attributes: true,
+    attributeFilter: ['data-phase'],
+  })
   const onResize = (): void => { schedule() }
   const onTransitionEnd = (): void => { schedule() }
   window.addEventListener('resize', onResize)

@@ -49,6 +49,14 @@
   background: transparent;
 }
 
+/* Desktop adds an opaque center-column fill outside ConversationRoot for
+   native window chrome (Windows titlebar and macOS). Clear this wrapper as
+   well as the inner conversation, with enough specificity to beat the
+   platform rule even when the host stylesheet loads after the theme. */
+[data-dsh-aqua] [data-dsh-frame] > [class*='centerCol'] {
+  background: transparent;
+}
+
 /* Must not use #root — CSS modules hash IDs (it became #wrr-ba_root and
    never applied). Fades live inside #root at z-index 7; sidebar is 9 so
    the 13px top fade cannot sit on the logo. */
@@ -238,6 +246,15 @@
 [data-dsh-float] header {
   margin: 12px 16px 0;
   padding: 10px 16px 8px;
+}
+
+/* The hero only needs its rightbar control, not an empty full-width panel.
+   Its header remains in flow so native controls retain their placement. */
+[data-dsh-float] [data-phase='hero'] header {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
 }
 
 /* Stock corner controls pull 16px past the title row's right edge. Keep the
@@ -733,25 +750,37 @@ html[data-dsh-float][data-dsh-aqua-wallpaper][data-dsh-aqua-media='video'] body[
   border-radius: 12px;
 }
 
-/* Rounded outlines distinguish navigation without changing glass opacity. */
-[data-dsh-float] [data-conversation-tabs] {
+/* Match the kit's medium segmented control; the pane owns the outer glass. */
+[data-dsh-float] [data-conversation-tabs][data-dsh-nico-control-group] {
   width: fit-content;
-  gap: 4px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
   margin-top: 8px;
   margin-bottom: 2px;
   padding: 4px;
   border-radius: 999px;
   background: transparent;
-  box-shadow: inset 0 1px 0 var(--dsh-nico-control-rim), inset 0 0 0 1px var(--dsh-aqua-glass-line-soft);
+  box-shadow: none;
 }
 
 [data-dsh-float] [data-conversation-tabs] [role='tab'] {
-  min-width: 62px;
-  padding: 6px 16px;
+  appearance: none;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 64px;
+  margin: 0;
+  padding: 7px 16px;
+  border: 0;
   border-radius: 999px;
+  font-size: 13px;
+  white-space: nowrap;
   color: var(--dsh-nico-control-muted);
   background: transparent;
-  transition: background-color 140ms ease, color 140ms ease, box-shadow 140ms ease;
+  box-shadow: none;
+  transition: background-color var(--ngs-transition-fast), color var(--ngs-transition-fast), transform var(--ngs-transition-fast);
 }
 
 [data-dsh-float] [data-conversation-tabs] [role='tab']::after {
@@ -762,7 +791,16 @@ html[data-dsh-float][data-dsh-aqua-wallpaper][data-dsh-aqua-media='video'] body[
   background: var(--dsh-nico-selection, var(--ngs-active-bg));
   color: var(--dsh-nico-control-text);
   font-weight: 600;
-  box-shadow: inset 0 1px 0 var(--dsh-nico-control-rim), 0 2px 6px rgb(0 0 0 / 0.12);
+  box-shadow: inset 0 1px 0 var(--dsh-nico-control-rim), inset 0 -1px 0 var(--dsh-nico-control-rim-bottom);
+}
+
+[data-dsh-float] [data-conversation-tabs] [role='tab']:active {
+  transform: scale(0.96);
+}
+
+[data-dsh-float] [data-conversation-tabs] [role='tab']:focus-visible {
+  outline: 2px solid var(--ngs-focus-ring);
+  outline-offset: 2px;
 }
 
 [data-dsh-float] [data-conversation-tabs] [role='tab']:hover:not([aria-selected='true']) {
@@ -911,7 +949,7 @@ html[data-dsh-float][data-dsh-aqua-wallpaper][data-dsh-aqua-media='video'] body[
   gap: 2px;
 }
 
-[data-dsh-float] [data-dsh-nico-control-group] button:not([role='menuitem']):not([role='option']):not([data-dockkit-tab-close]),
+[data-dsh-float] [data-dsh-nico-control-group] button:not([role='tab']):not([role='menuitem']):not([role='option']):not([data-dockkit-tab-close]),
 [data-dsh-float] [data-dsh-nico-icon-control] {
   box-sizing: border-box;
   min-width: 32px;
@@ -933,12 +971,12 @@ html[data-dsh-float][data-dsh-aqua-wallpaper][data-dsh-aqua-media='video'] body[
   padding: 0;
 }
 
-[data-dsh-float] [data-dsh-nico-control-group] button:hover:not(:disabled) {
+[data-dsh-float] [data-dsh-nico-control-group] button:not([role='tab']):hover:not(:disabled) {
   background: var(--dsh-nico-hover);
   box-shadow: none;
 }
 
-[data-dsh-float] [data-dsh-nico-control-group] button[role='tab'][aria-selected='true'],
+[data-dsh-float] [data-dsh-nico-control-group]:not([data-conversation-tabs]) button[role='tab'][aria-selected='true'],
 [data-dsh-float] [data-dockkit-tab][aria-selected='true'] {
   background: var(--dsh-nico-selection);
   box-shadow: inset 0 1px 0 var(--dsh-nico-control-rim);

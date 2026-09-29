@@ -1,7 +1,7 @@
 {
   "name": "dsh-nico-theme",
   "description": "Nico glass theme for DeepSeek Harness Web UI — glass material rendered by nico-glass-kit. Adapted for DSH 0.2.0-rc.2. Not affiliated with DeepSeek.",
-  "version": "0.3.4",
+  "version": "0.3.8",
   "private": false,
   "repository": {
     "type": "git",
@@ -67,12 +67,9 @@
     "access": "public"
   },
   "license": "MIT",
-  "dependencies": {
-    "@deepseek-ai/dsh-settings": "^0.1.7-rc.2 || ^0.2.0-rc.2",
-    "@deepseek-ai/schemastery": "~3.18.4"
-  },
   "peerDependencies": {
     "@deepseek-ai/cordis": "~4.0.4",
+    "@deepseek-ai/dsh-settings": "^0.1.7-rc.2 || ^0.2.0-rc.2",
     "@deepseek-ai/dsh-client-locale": "^0.1.7-rc.2 || ^0.2.0-rc.2",
     "@deepseek-ai/dsh-client-store": "^0.1.7-rc.2 || ^0.2.0-rc.2",
     "@deepseek-ai/dsh-client-ui-primitives": "^0.1.7-rc.2 || ^0.2.0-rc.2",
@@ -84,6 +81,11 @@
     "@deepseek-ai/dsh-invariants": "^0.1.7-rc.2 || ^0.2.0-rc.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/dsh-settings": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@deepseek-ai/cordis": "~4.0.4",

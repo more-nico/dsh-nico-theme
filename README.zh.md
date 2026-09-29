@@ -63,13 +63,13 @@
 
 ## 来源
 
-本仓库是 [WYH66666666/DSH-Transparent-UI-Plugin](https://github.com/WYH66666666/DSH-Transparent-UI-Plugin) 的 **fork**（MIT，© 2026 John Wu），适配 **DSH 0.1.7-rc.2**。
+本仓库是 [WYH66666666/DSH-Transparent-UI-Plugin](https://github.com/WYH66666666/DSH-Transparent-UI-Plugin) 的 **fork**（MIT，© 2026 John Wu），适配 **DSH 0.2.0-rc.2**。
 
 面板玻璃（折射、倒角、着色、边缘高光、弹性）由 [nico-glass-kit](https://github.com/more-nico/nico-glass-kit)（`0.3.2`，MIT）渲染；流体背景、壁纸层与会话垫层是本仓库自己的 CSS / canvas 实现。
 
 ## 环境
 
-- `@deepseek-ai/dsh@0.1.7-rc.2`（本轮实测版本）
+- `@deepseek-ai/dsh@0.2.0-rc.2`（本轮实测版本）
 - Node.js 22+
 - 折射需要 Chromium 系浏览器；Firefox 和 Safari 自动退回 kit 的普通 CSS 磨砂
 

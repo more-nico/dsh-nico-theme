@@ -63,13 +63,13 @@ A DSH client plugin. The panel glass is rendered by [nico-glass-kit](https://git
 
 ## Origins
 
-This repository is a **fork** of [WYH66666666/DSH-Transparent-UI-Plugin](https://github.com/WYH66666666/DSH-Transparent-UI-Plugin) (MIT, © 2026 John Wu), adapted for **DSH 0.1.7-rc.2**.
+This repository is a **fork** of [WYH66666666/DSH-Transparent-UI-Plugin](https://github.com/WYH66666666/DSH-Transparent-UI-Plugin) (MIT, © 2026 John Wu), adapted for **DSH 0.2.0-rc.2**.
 
 The panel glass — refraction, bevel, tint, rim light, and elasticity — is rendered by [nico-glass-kit](https://github.com/more-nico/nico-glass-kit) (`0.3.2`, MIT). The fluid backdrop, wallpaper layers, and reading pads are this repository's own CSS/canvas work.
 
 ## Requirements
 
-- `@deepseek-ai/dsh@0.1.7-rc.2` (tested version)
+- `@deepseek-ai/dsh@0.2.0-rc.2` (tested version)
 - Node.js 22+
 - The refraction pass wants a Chromium browser; Firefox and Safari fall back to the kit's plain CSS frost on their own
 

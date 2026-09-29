@@ -48,7 +48,10 @@ const SEAMS: readonly Seam[] = [
   // Session-header background-jobs popover (a <ul>, not role=menu).
   { attribute: 'data-dsh-jobs', selector: 'ul[aria-label="后台任务"], ul[aria-label="Background jobs"]' },
   // Native menu underlays must yield to the kit instead of hiding its lens.
-  { attribute: 'data-dsh-nico-native-material', selector: '[role="menu"] > [class*="material"], [role="listbox"] > [class*="material"], [data-trigger-menu] > [class*="material"], [role="dialog"] > [class*="material"]' },
+  // DSH 0.2 wraps the searchable model list in a group; its inner menu is
+  // only the scroll viewport. Keep one material owner around both sections.
+  { attribute: 'data-dsh-nico-model-menu', selector: '[role="group"][class*="menu"]:has(> [role="menu"][class*="groups"])' },
+  { attribute: 'data-dsh-nico-native-material', selector: '[role="menu"] > [class*="material"], [data-dsh-nico-model-menu] > [class*="material"], [role="listbox"] > [class*="material"], [data-trigger-menu] > [class*="material"], [role="dialog"] > [class*="material"]' },
   { attribute: 'data-dsh-nico-option-check', selector: '[role="menuitem"] > svg[class*="check"]' },
   { attribute: 'data-dsh-nico-header-action', selector: '[data-dsh-nico-pane="header"] button:not([role="tab"]):not([aria-haspopup="tree"])' },
   { attribute: 'data-dsh-nico-row-title', selector: '[data-row-key] > [class*="title"]' },

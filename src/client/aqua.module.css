@@ -179,7 +179,7 @@
 }
 
 /* Before discovery, use the same configured frosting as the kit low tier. */
-[data-dsh-float] :is([role='menu'], [role='listbox'], [data-trigger-menu], [role='dialog']:not([aria-modal='true'])):not([data-dsh-nico-pane]):not(:global(.ngs-surface)):not([data-trigger-menu] *) {
+[data-dsh-float] :is([role='menu'], [role='listbox'], [data-dsh-nico-model-menu], [data-trigger-menu], [role='dialog']:not([aria-modal='true'])):not([data-dsh-nico-pane]):not(:global(.ngs-surface)):not([data-trigger-menu] *):not([data-dsh-nico-model-menu] *) {
   background: transparent;
   border-radius: 18px;
   backdrop-filter: blur(var(--dsh-nico-blur)) saturate(100%) brightness(var(--dsh-nico-brightness));
@@ -784,10 +784,15 @@ html[data-dsh-float][data-dsh-aqua-wallpaper][data-dsh-aqua-media='video'] body[
 
 /* GlassSelect option geometry and state tokens, read from the kit surface.
    Selection fill is the playground's semantic highlight, not pane material. */
-[data-dsh-float] :is([role='menu'], [role='listbox']) {
+[data-dsh-float] :is([role='menu'], [role='listbox'], [data-dsh-nico-model-menu]) {
   --dsh-nico-list-pad: 5px;
   padding: var(--dsh-nico-list-pad);
   gap: 2px;
+}
+
+/* The model group's outer surface owns the inset, including its search row. */
+[data-dsh-float] [data-dsh-nico-model-menu] > [role='menu'] {
+  padding: 0;
 }
 
 [data-dsh-float] :is([role='menuitem'], [role='menuitemradio'], [role='option']) {
@@ -801,7 +806,7 @@ html[data-dsh-float][data-dsh-aqua-wallpaper][data-dsh-aqua-media='video'] body[
   transition: background-color var(--ngs-transition-fast), color var(--ngs-transition-fast);
 }
 
-[data-dsh-float] :is([role='menuitem'], [role='menuitemradio'], [role='option']):is(:hover, :focus-visible):not(:disabled):not([aria-disabled='true']) {
+[data-dsh-float] :is([role='menuitem'], [role='menuitemradio'], [role='option']):is(:hover, :focus-visible, [data-highlighted]):not(:disabled):not([aria-disabled='true']) {
   background: var(--dsh-nico-hover, var(--ngs-tint-hover));
 }
 

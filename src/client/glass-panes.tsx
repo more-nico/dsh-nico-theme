@@ -104,7 +104,7 @@ const PANE_DEFS: readonly PaneDef[] = [
   { key: 'header', select: sessionHeader },
   { key: 'composer', select: () => first('[data-composer-card]') },
   { key: 'dialog', select: () => all('[role="dialog"]') },
-  { key: 'menu', select: () => all('[role="menu"]') },
+  { key: 'menu', select: () => all('[role="menu"]:not([data-dsh-nico-model-menu] *), [data-dsh-nico-model-menu]') },
   { key: 'agent-menu', select: () => all('[class*="menu"]:has(> [role="tree"][class*="menuBody"])') },
   { key: 'tooltip', select: () => all('[role="tooltip"]') },
   // Reply actions keep the shared capsule layout but use the reading pad.
